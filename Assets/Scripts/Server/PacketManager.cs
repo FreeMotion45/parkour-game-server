@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityMultiplayer.Shared.Networking.Datagrams.Handling;
 using Assets.Scripts.Shared;
+using Assets.Scripts.Server.Handling.Default;
 
 namespace UnityMultiplayer.Server
 {
@@ -42,6 +43,8 @@ namespace UnityMultiplayer.Server
             _reliableNetworkListener = new ReliableNetworkListener(_localEndPoint, new ReliableNetworkMessager(), _serializer);
             _unreliableNetworkListener = new UnreliableNetworkListener(_localEndPoint, _hostToChannel, _serializer);            
             _reliableNetworkListener.Start();
+
+            _datagramHandlerResolver.AddHandler(DatagramType.Inputs, new NetInputsHandler());
 
             GigaNetGlobals.packetManager = this;
         }        

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Scripts.Shared.Datagrams.Handling;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,17 +7,17 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 namespace UnityMultiplayer.Shared.Networking.Datagrams.Handling
-{
+{    
     public class DatagramHandlerResolver : MonoBehaviour
     {
-        private Dictionary<DatagramType, BaseBehaviourDatagramHandler> _typeHandlingMap;
+        private Dictionary<DatagramType, IDatagramHandler> _typeHandlingMap;
 
         private void Start()
         {
-            _typeHandlingMap = new Dictionary<DatagramType, BaseBehaviourDatagramHandler>();
+            _typeHandlingMap = new Dictionary<DatagramType, IDatagramHandler>();
         }
 
-        public void AddHandler(DatagramType type, BaseBehaviourDatagramHandler handler)
+        public void AddHandler(DatagramType type, IDatagramHandler handler)
         {
             _typeHandlingMap[type] = handler;
         }
@@ -26,7 +27,7 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams.Handling
             _typeHandlingMap.Remove(datagramType);
         }
 
-        public BaseBehaviourDatagramHandler Resolve(DatagramType type)
+        public IDatagramHandler Resolve(DatagramType type)
         {
             if (!_typeHandlingMap.ContainsKey(type))
             {

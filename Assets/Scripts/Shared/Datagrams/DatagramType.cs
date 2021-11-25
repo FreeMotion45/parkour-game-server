@@ -11,5 +11,6 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams
         Transform,
         Instantiate,
         UnreliableKeepAlive,
+        Inputs,
     }
 }

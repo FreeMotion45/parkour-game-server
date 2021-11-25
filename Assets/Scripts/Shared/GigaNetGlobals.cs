@@ -13,6 +13,7 @@ namespace Assets.Scripts.Shared
     {
         public static PacketManager packetManager;
         public static InterpolationManager interpolationManager;
+        public static PhysicsSimulator physics;
 
         public static void PublishMessage(DatagramHolder datagramHolder,
             IEnumerable<INetworkChannel> receivers = null,

@@ -45,6 +45,7 @@ namespace UnityMultiplayer.Server
             _reliableNetworkListener.Start();
 
             _datagramHandlerResolver.AddHandler(DatagramType.Inputs, new NetInputsHandler());
+            _datagramHandlerResolver.AddHandler(DatagramType.AbsoluteTransform, new NetAbsoluteTransformHandler());
 
             GigaNetGlobals.packetManager = this;
         }        

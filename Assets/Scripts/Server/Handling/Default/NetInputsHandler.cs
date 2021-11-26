@@ -13,8 +13,7 @@ namespace Assets.Scripts.Server.Handling.Default
 {
     class NetInputsHandler : IDatagramHandler
     {
-        private readonly Dictionary<int, ServerNetInputs> netInputs = new Dictionary<int, ServerNetInputs>();
-        private readonly BitReader bitReader = new BitReader();
+        private readonly Dictionary<int, ServerNetInputs> netInputs = new Dictionary<int, ServerNetInputs>();        
 
         public void Handle(DatagramHolder deserializedDatagram, NetworkChannel networkChannel)
         {

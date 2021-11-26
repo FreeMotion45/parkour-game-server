@@ -9,6 +9,7 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams
     public enum DatagramType
     {
         Transform,
+        AbsoluteTransform,
         Instantiate,
         UnreliableKeepAlive,
         Inputs,

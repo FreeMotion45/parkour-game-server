@@ -19,10 +19,13 @@ public struct Axis
 
 class ServerNetInputs : MonoBehaviour, INetInputSource
 {
-    [SerializeField] private bool clientControlsRotation;
+    [Header("Network controls")]
+    public bool clientControlsPosition;
+    public bool clientControlsRotation;
 
     [Space]
-    
+
+    [Header(null)]
     public string[] netInputs;
     public string[] keyDowns;
     public Axis[] definedAxis;

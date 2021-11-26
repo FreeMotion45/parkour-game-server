@@ -8,13 +8,40 @@ using UnityEngine;
 
 namespace UnityMultiplayer.Shared.Networking.Datagrams.Handling
 {    
+    [Serializable]
+    public class DatagramHandler
+    {
+        public DatagramType type;
+        public BaseBehaviourDatagramHandler handler;
+    }
+
     public class DatagramHandlerResolver : MonoBehaviour
     {
-        private Dictionary<DatagramType, IDatagramHandler> _typeHandlingMap;
+        public DatagramHandler[] handlers;
+
+        private Dictionary<DatagramType, IDatagramHandler> _typeHandlingMap = new Dictionary<DatagramType, IDatagramHandler>();
 
         private void Start()
         {
-            _typeHandlingMap = new Dictionary<DatagramType, IDatagramHandler>();
+            HashSet<DatagramType> forbiddenByDefault = new HashSet<DatagramType>
+            {
+                DatagramType.Handshake, DatagramType.Disconnect, DatagramType.UnreliableKeepAlive,
+            };
+
+            foreach (DatagramHandler handler in handlers)
+            {
+                if (forbiddenByDefault.Contains(handler.type))
+                {
+                    throw new ArgumentException($"Datagram handler of type {handler.type} is forbidden by default.");
+                }
+
+                if (handler.handler == null)
+                {
+                    throw new ArgumentNullException($"Handler of type {handler.type} can't null.");
+                }
+
+                _typeHandlingMap[handler.type] = handler.handler;
+            }
         }
 
         public void AddHandler(DatagramType type, IDatagramHandler handler)

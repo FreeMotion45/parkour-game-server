@@ -10,15 +10,7 @@ using UnityEngine;
 namespace UnityMultiplayer.Shared.Networking.Datagrams.Handling
 {
     public abstract class BaseBehaviourDatagramHandler : MonoBehaviour, IDatagramHandler
-    {
-        [SerializeField] private DatagramHandlerResolver _datagramHandlerResolver;
-        [SerializeField] private DatagramType _datagramType;
-
-        protected virtual void Start()
-        {
-            _datagramHandlerResolver.AddHandler(_datagramType, this);
-        }
-
+    {                
         public abstract void Handle(DatagramHolder deserializedDatagram, NetworkChannel networkChannel);
     }
 }

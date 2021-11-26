@@ -130,11 +130,8 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
             PerformedHandshake = true;
         }
 
-        private void ServerConfirmHandshake()
-        {
-            DatagramHolder handshakeRequest = ReadOneMessage();
-            if (handshakeRequest.DatagramType != DatagramType.Handshake)
-                throw new Exception("Handshake failed with client. Make sure the client is set up correctly.");
+        public void ServerConfirmHandshake()
+        {            
             AsyncSendDatagramHolder(new DatagramHolder(DatagramType.Handshake, null));
             PerformedHandshake = true;
         }
@@ -166,7 +163,7 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
                 {
                     // This means that we can't send a message because the client is closed.
                     // Its also OK.
-                    RemoteOpen = false;
+                    RemoteOpen = false;                    
                     break;
                 }
             }

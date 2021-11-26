@@ -40,7 +40,7 @@ namespace UnityMultiplayer.Server
         public IReadOnlyList<BaseNetworkChannel> NetworkChannels => _networkChannels;        
 
         public void Start()
-        {            
+        {                        
             _networkChannels = new List<BaseNetworkChannel>();
             _nonHandshakedChannels = new List<BaseNetworkChannel>();
             _hostToChannel = new Dictionary<IPEndPoint, NetworkChannel>();            
@@ -125,7 +125,9 @@ namespace UnityMultiplayer.Server
                     var remote = nonHandshakedClient.RemoteEndPoint;
                     if (handshake.DatagramType == DatagramType.Handshake)
                     {
-                        nonHandshakedClient.Send(null, DatagramType.Handshake);                        
+                        nonHandshakedClient.ReliableChannel.ServerConfirmHandshake();
+                        _nonHandshakedChannels.Remove(nonHandshakedClient);
+                        _networkChannels.Add(nonHandshakedClient);
                         Debug.Log($"Successfully performed hand shake with: {remote.Address}:{remote.Port}");
                     }
                     else

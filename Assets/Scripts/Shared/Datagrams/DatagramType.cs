@@ -9,9 +9,13 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams
     public enum DatagramType
     {
         // For default handlers.
-        Handshake,        
+        Handshake,
         Disconnect,
         UnreliableKeepAlive,
+
         // Everything else below.
+        RequestJoin,
+        PlayerJoin,
+        PlayerMove,
     }
 }

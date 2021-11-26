@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
-  - component: {fileID: 1729182847894031380}
-  - component: {fileID: 1662394620971383273}
+  - component: {fileID: 4811921745814474665}
+  - component: {fileID: 5077700425575008921}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -86,7 +86,7 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_Enabled: 1
---- !u!114 &1729182847894031380
+--- !u!114 &4811921745814474665
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -95,13 +95,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 963194225}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 253ecc96610ca9449b5c420a7e94facb, type: 3}
+  m_Script: {fileID: 11500000, guid: 508445dfdd1a36c468a6554d77b52a03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   hash: 0
-  networkMovement: 1
   prefab: 
---- !u!114 &1662394620971383273
+  networkMovement: 1
+--- !u!114 &5077700425575008921
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -130,8 +130,8 @@ GameObject:
   - component: {fileID: 6891811282889274742}
   - component: {fileID: 7046285138853261022}
   - component: {fileID: 5018877546417217550}
-  - component: {fileID: 1837721628836787096}
-  - component: {fileID: 3433390221526738820}
+  - component: {fileID: 4773424550769841762}
+  - component: {fileID: 8682525924126465978}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -219,7 +219,7 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1837721628836787096
+--- !u!114 &4773424550769841762
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -228,13 +228,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 5772381404621785013}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 253ecc96610ca9449b5c420a7e94facb, type: 3}
+  m_Script: {fileID: 11500000, guid: 508445dfdd1a36c468a6554d77b52a03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   hash: 0
-  networkMovement: 1
   prefab: 
---- !u!114 &3433390221526738820
+  networkMovement: 1
+--- !u!114 &8682525924126465978
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -248,18 +248,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   clientControlsPosition: 1
   clientControlsRotation: 1
-  netInputs:
-  - Forward
-  - Backward
-  - Left
-  - Right
-  - Sprint
-  keyDowns:
-  - Jump
-  definedAxis:
-  - name: Vertical
-    positive: Forward
-    negative: Backward
-  - name: Horizontal
-    positive: Right
-    negative: Left
+  netInputs: []
+  keyDowns: []
+  definedAxis: []

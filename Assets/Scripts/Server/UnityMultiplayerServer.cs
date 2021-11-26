@@ -15,9 +15,14 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityMultiplayer.Shared.Networking.Datagrams.Handling;
 using Assets.Scripts.Shared;
+using UnityEngine.Events;
 
 namespace UnityMultiplayer.Server
 {
+    [Serializable]
+    public class OnDisconnectEvent : UnityEvent<BaseNetworkChannel>
+    { }
+
     class UnityMultiplayerServer : MonoBehaviour
     {
         [SerializeField] private string _hostIP;
@@ -26,6 +31,8 @@ namespace UnityMultiplayer.Server
         [SerializeField] private DatagramHandlerResolver _datagramHandlerResolver;        
         [Space]
         [SerializeField] private BaseGameObjectSerializer _serializer;
+        [Space]
+        public OnDisconnectEvent OnDisconnect;
 
         private List<BaseNetworkChannel> _networkChannels;
         private List<BaseNetworkChannel> _nonHandshakedChannels;
@@ -103,14 +110,22 @@ namespace UnityMultiplayer.Server
                 DatagramHolder[] allMessages = networkChannel.GetAllReliableAndUnreliableMessages();
                 if (!networkChannel.IsConnected)
                 {
+                    DisconnectChannel(networkChannel);
                     Debug.Log("Client disconnected without disconnect request...");
-                    _networkChannels.Remove(networkChannel);
-                    _hostToChannel.Remove(networkChannel.RemoteEndPoint);
-                    networkChannel.Dispose();
                     continue;
                 }
+
                 foreach (DatagramHolder message in allMessages)
                 {
+                    if (message.DatagramType == DatagramType.Disconnect)
+                    {
+                        DisconnectChannel(networkChannel);
+
+                        // Breaking because after the disconnect we do no want
+                        // to process any other messages sent by the client.
+                        break;
+                    }
+                    
                     ProcessMessage(message, networkChannel);
                 }
             }
@@ -125,19 +140,30 @@ namespace UnityMultiplayer.Server
                     var remote = nonHandshakedClient.RemoteEndPoint;
                     if (handshake.DatagramType == DatagramType.Handshake)
                     {
-                        nonHandshakedClient.ReliableChannel.ServerConfirmHandshake();
+                        nonHandshakedClient.ReliableChannel.ServerConfirmHandshake(nonHandshakedClient.ChannelID);
                         _nonHandshakedChannels.Remove(nonHandshakedClient);
                         _networkChannels.Add(nonHandshakedClient);
                         Debug.Log($"Successfully performed hand shake with: {remote.Address}:{remote.Port}");
                     }
                     else
                     {
+                        DisconnectChannel(nonHandshakedClient);
                         Debug.LogWarning($"Client {remote.Address}:{remote.Port} did not send a handshake before sending data.");
-                        nonHandshakedClient.Dispose();
-                        _nonHandshakedChannels.Remove(nonHandshakedClient);
                     }
                 }
             }
+        }
+
+        private void DisconnectChannel(NetworkChannel networkChannel)
+        {
+            if (networkChannel.PerformedHandshake)
+                OnDisconnect.Invoke(networkChannel);
+
+            if (_networkChannels.Contains(networkChannel))
+                _networkChannels.Remove(networkChannel);
+
+            _hostToChannel.Remove(networkChannel.RemoteEndPoint);
+            networkChannel.Dispose();                      
         }
 
         private void ProcessMessage(DatagramHolder datagramHolder, NetworkChannel sender)

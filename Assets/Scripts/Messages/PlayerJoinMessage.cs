@@ -13,11 +13,15 @@ namespace Assets.Scripts.Messages
     {
         public SerializableVector3 spawnPosition;
         public string playerName;
+        public int transformHash;
+        public int owner;
 
-        public PlayerJoinMessage(string playerName, Vector3 spawnPosition)
+        public PlayerJoinMessage(string playerName, int owner, int transformHash, Vector3 spawnPosition)
         {
             this.playerName = playerName;
             this.spawnPosition = new SerializableVector3(spawnPosition);
+            this.transformHash = transformHash;
+            this.owner = owner;
         }
     }
 }

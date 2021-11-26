@@ -130,9 +130,9 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
             PerformedHandshake = true;
         }
 
-        public void ServerConfirmHandshake()
+        public void ServerConfirmHandshake(int id)
         {            
-            AsyncSendDatagramHolder(new DatagramHolder(DatagramType.Handshake, null));
+            AsyncSendDatagramHolder(new DatagramHolder(DatagramType.Handshake, id));
             PerformedHandshake = true;
         }
 

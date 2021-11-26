@@ -1,5 +1,7 @@
 ﻿using Assets.Scripts.Messages.ClientOrigin;
+using Assets.Scripts.Server;
 using Assets.Scripts.ServerLogic;
+using Assets.Scripts.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,8 +18,11 @@ namespace Assets.Scripts.Handlers
     {
         public override void Handle(DatagramHolder deserializedDatagram, NetworkChannel networkChannel)
         {
-            MovePlayerMessage movePlayerMessage = (MovePlayerMessage)deserializedDatagram.Data;
-            GameObject player = PlayerDatabase.players[networkChannel];
+            MoveTransformMessage movePlayerMessage = (MoveTransformMessage)deserializedDatagram.Data;
+
+            if (!Ownership.Owns(networkChannel, movePlayerMessage.transformHash)) return;
+
+            GameObject player = NetTransform.networkObjects[movePlayerMessage.transformHash].gameObject;
             player.transform.position = movePlayerMessage.Position;
             player.transform.eulerAngles = movePlayerMessage.EulerAngles;
         }

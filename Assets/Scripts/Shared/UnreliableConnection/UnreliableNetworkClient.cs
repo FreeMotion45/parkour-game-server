@@ -174,10 +174,10 @@ namespace UnityMultiplayer.Shared.Networking
             _messagesWaitingForKeepAlive.Enqueue(bytes);
 
             // * 1.5 to compensate for network lags.
-            if (MillisecondsSinceLastReceivedKeepAlive() >= KEEP_ALIVE_INTERVAL * 1.5)
-            {
-                return;
-            }
+            //if (MillisecondsSinceLastReceivedKeepAlive() >= KEEP_ALIVE_INTERVAL * 1.5)
+            //{
+            //    return;
+            //}
 
             while (_messagesWaitingForKeepAlive.Count > 0)
             {

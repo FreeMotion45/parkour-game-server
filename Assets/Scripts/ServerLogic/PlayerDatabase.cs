@@ -10,9 +10,9 @@ using UnityMultiplayer.Shared.Networking.Datagrams;
 
 namespace Assets.Scripts.ServerLogic
 {
-    class PlayerDatabase
+    class PlayerDatabase : MonoBehaviour
     {
-        public static readonly Dictionary<NetworkChannel, GameObject> players = new Dictionary<NetworkChannel, GameObject>();
+        public static readonly Dictionary<BaseNetworkChannel, GameObject> players = new Dictionary<BaseNetworkChannel, GameObject>();
 
         public static void Publish(object data,
             DatagramType datagramType,
@@ -24,6 +24,12 @@ namespace Assets.Scripts.ServerLogic
                 if (sender == channel) continue;
                 channel.Send(data, datagramType, transport);
             }
+        }
+
+        public void OnDisconnect(BaseNetworkChannel disconnectedChannel)
+        {
+            if (players.ContainsKey(disconnectedChannel))
+                players.Remove(disconnectedChannel);
         }
     }
 }

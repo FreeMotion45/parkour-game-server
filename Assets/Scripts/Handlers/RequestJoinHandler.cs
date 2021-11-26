@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Messages;
 using Assets.Scripts.Messages.ClientOrigin;
 using Assets.Scripts.ServerLogic;
+using Assets.Scripts.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,9 +26,12 @@ namespace Assets.Scripts.Handlers
             GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
             player.name = request.name;
 
+            int transformHash = NetTransform.RegisterNewNetObject(player);
+            Ownership.AddOwned(networkChannel, transformHash);
+
             PlayerDatabase.players[networkChannel] = player;
 
-            PlayerJoinMessage playerJoinMessage = new PlayerJoinMessage(request.name, spawnPosition);
+            PlayerJoinMessage playerJoinMessage = new PlayerJoinMessage(request.name, networkChannel.ChannelID, transformHash, spawnPosition);
             PlayerDatabase.Publish(playerJoinMessage, DatagramType.PlayerJoin);
         }
     }

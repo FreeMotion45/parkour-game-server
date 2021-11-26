@@ -8,8 +8,10 @@ using UnityEngine;
 namespace Assets.Scripts.Messages.ClientOrigin
 {
     [Serializable]
-    class MovePlayerMessage
+    class MoveTransformMessage
     {
+        public int transformHash;
+
         public float posX;
         public float posY;
         public float posZ;
@@ -18,8 +20,9 @@ namespace Assets.Scripts.Messages.ClientOrigin
         public float eulerY;
         public float eulerZ;
 
-        public MovePlayerMessage(Vector3 position, Vector3 eulerAngles)
+        public MoveTransformMessage(int transformHash, Vector3 position, Vector3 eulerAngles)
         {
+            this.transformHash = transformHash;
             Position = position;
             EulerAngles = eulerAngles;
         }

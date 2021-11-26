@@ -16,6 +16,7 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams
         // Everything else below.
         RequestJoin,
         PlayerJoin,
-        PlayerMove,
+        MoveTransform,
+        TransformsUpdate,
     }
 }

@@ -16,7 +16,9 @@ namespace UnityMultiplayer.Shared.Networking
         private bool _disposed;
         private bool _shouldConnect;
 
-        public NetworkChannel(ReliableNetworkClient reliableChannel, UnreliableNetworkClient unreliableChannel)
+        public NetworkChannel(ReliableNetworkClient reliableChannel,
+            UnreliableNetworkClient unreliableChannel, int channelID) : base(channelID)
+
         {
             ReliableChannel = reliableChannel;
             UnreliableChannel = unreliableChannel;
@@ -25,7 +27,7 @@ namespace UnityMultiplayer.Shared.Networking
             _shouldConnect = false;
         }
 
-        public NetworkChannel(IPEndPoint remoteEndPoint, BaseGameObjectSerializer serializer)
+        public NetworkChannel(IPEndPoint remoteEndPoint, BaseGameObjectSerializer serializer) : base(0)
         {
             // We need to create and connect the channels.
             ReliableChannel = new ReliableNetworkClient(remoteEndPoint, new ReliableNetworkMessager(), serializer);

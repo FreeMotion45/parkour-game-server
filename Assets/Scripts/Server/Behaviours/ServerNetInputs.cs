@@ -1,8 +1,8 @@
 ﻿using Assets.Scripts.Server;
 using Assets.Scripts.Server.Behaviours;
-using Assets.Scripts.Server.Inputs;
 using Assets.Scripts.Shared;
 using Assets.Scripts.Shared.Datagrams.Messages;
+using Assets.Scripts.Shared.Inputs;
 using Assets.Scripts.Utils;
 using System;
 using System.Collections.Generic;
@@ -10,14 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-
-[Serializable]
-public struct Axis
-{
-    public string name;
-    public string positive;
-    public string negative;
-}
 
 [RequireComponent(typeof(ServerNetTransform))]
 class ServerNetInputs : MonoBehaviour, INetInputSource
@@ -29,9 +21,9 @@ class ServerNetInputs : MonoBehaviour, INetInputSource
     [Space]
 
     [Header(null)]
-    public string[] netInputs;
-    public string[] keyDowns;
-    public Axis[] definedAxis;
+    [HideInInspector] public string[] netInputs;
+    [HideInInspector] public string[] keyDowns;
+    [HideInInspector] public InputAxis[] definedAxis;
 
     private List<INetInputReceiver> inputControlled = new List<INetInputReceiver>();
     private Rigidbody inputRigidbody;
@@ -125,7 +117,7 @@ class ServerNetInputs : MonoBehaviour, INetInputSource
     public int GetAxisRaw(string axisName)
     {
         int value = 0;
-        Axis axis = definedAxis.FirstOrDefault(x => x.name == axisName);
+        InputAxis axis = definedAxis.FirstOrDefault(x => x.name == axisName);
         if (held.Contains(axis.positive))
         {
             value++;

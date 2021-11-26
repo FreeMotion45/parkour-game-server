@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Shared.Datagrams.Messages;
+﻿using Assets.Scripts.Shared;
+using Assets.Scripts.Shared.Datagrams.Messages;
 using Assets.Scripts.Utils;
 using System;
 using System.Collections.Generic;
@@ -20,16 +21,17 @@ namespace Assets.Scripts.Server.Behaviours
         }
 
         public static Dictionary<int, ServerNetTransform> networkTransforms = new Dictionary<int, ServerNetTransform>();
+        public static Dictionary<int, BaseNetworkChannel> ownership = new Dictionary<int, BaseNetworkChannel>();
 
-        public static GameObject NetInstantiate(string prefab, Vector3 position)
-        {
+        public static GameObject NetInstantiate(string prefab, Vector3 position, BaseNetworkChannel owner = null)
+        {            
             int hash = NextHash();
 
             GameObject instantiatedNetObject = GameObject.Instantiate(NetPrefabs.netPrefabs[prefab], position, Quaternion.identity);
             ServerNetTransform netTransform = instantiatedNetObject.GetComponent<ServerNetTransform>();
             networkTransforms[hash] = netTransform;
             netTransform.prefab = prefab;
-            netTransform.hash = hash;
+            netTransform.hash = hash;            
 
             GigaNetServerGlobals.PublishMessage(new NetInstantiateMessage(prefab, instantiatedNetObject.transform.position,
                 hash), DatagramType.Instantiate);
@@ -37,6 +39,12 @@ namespace Assets.Scripts.Server.Behaviours
             ServerNetTransform[] childNetTransforms = netTransform.GetComponentsInChildren<ServerNetTransform>(includeInactive: true);
             foreach (ServerNetTransform childNetTransform in childNetTransforms)
             {
+                ownership[hash] = null;
+                if (owner != null)
+                {
+                    ownership[hash] = owner;
+                }
+
                 if (childNetTransform == netTransform) continue;
 
                 childNetTransform.hash = NextHash();
@@ -46,8 +54,8 @@ namespace Assets.Scripts.Server.Behaviours
             return instantiatedNetObject;
         }
 
-        public int hash;        
-        public string prefab;
+        [HideInInspector] public int hash;        
+        [HideInInspector] public string prefab;
         public NetworkMovement networkMovement = NetworkMovement.Interpolated;
 
         private TrackedValue<Vector3> position;

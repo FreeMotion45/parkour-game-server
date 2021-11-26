@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.Server.Inputs;
+﻿using Assets.Scripts.Shared.Inputs;
 using System;
 using System.Collections;
 using System.Collections.Generic;

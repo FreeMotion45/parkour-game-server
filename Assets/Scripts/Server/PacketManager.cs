@@ -33,6 +33,8 @@ namespace UnityMultiplayer.Server
         private ReliableNetworkListener _reliableNetworkListener;        
         private UnreliableNetworkListener _unreliableNetworkListener;
 
+        private int clientId;
+
         public IReadOnlyList<BaseNetworkChannel> NetworkChannels => _networkChannels;        
 
         public void Start()
@@ -68,6 +70,8 @@ namespace UnityMultiplayer.Server
             List<NetworkChannel> newChannels = new List<NetworkChannel>();
             foreach (ReliableNetworkClient client in newClients)
             {
+                clientId++;
+
                 client.Connect();
                 // Configure the UnreliableNetworkClient to send through an existing UdpClient and read unreliable messages virtually.
                 IPEndPoint remote = (IPEndPoint)client.Client.Client.RemoteEndPoint;
@@ -75,7 +79,7 @@ namespace UnityMultiplayer.Server
                 unreliableNetworkClient.ThisInitiatedConnection = false;
                 unreliableNetworkClient.Connect();
 
-                NetworkChannel networkChannel = new NetworkChannel(client, unreliableNetworkClient);
+                NetworkChannel networkChannel = new NetworkChannel(client, unreliableNetworkClient, clientId);
 
                 _networkChannels.Add(networkChannel);
                 _hostToChannel[remote] = networkChannel;

@@ -15,8 +15,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityMultiplayer.Shared.Networking.Datagrams.Handling;
 using Assets.Scripts.Shared;
-using Assets.Scripts.Server.Handling.Default;
-using Assets.Scripts.Server;
 
 namespace UnityMultiplayer.Server
 {
@@ -46,11 +44,6 @@ namespace UnityMultiplayer.Server
             _reliableNetworkListener = new ReliableNetworkListener(_localEndPoint, new ReliableNetworkMessager(), _serializer);
             _unreliableNetworkListener = new UnreliableNetworkListener(_localEndPoint, _hostToChannel, _serializer);            
             _reliableNetworkListener.Start();
-
-            _datagramHandlerResolver.AddHandler(DatagramType.Inputs, new NetInputsHandler());
-            _datagramHandlerResolver.AddHandler(DatagramType.AbsoluteTransform, new NetAbsoluteTransformHandler());
-
-            GigaNetServerGlobals.packetManager = this;
         }        
 
         public void OnDisable()
@@ -71,8 +64,8 @@ namespace UnityMultiplayer.Server
             foreach (ReliableNetworkClient client in newClients)
             {
                 clientId++;
-
                 client.Connect();
+
                 // Configure the UnreliableNetworkClient to send through an existing UdpClient and read unreliable messages virtually.
                 IPEndPoint remote = (IPEndPoint)client.Client.Client.RemoteEndPoint;
                 UnreliableNetworkClient unreliableNetworkClient = new UnreliableNetworkClient(remote, _serializer, _unreliableNetworkListener.UdpClient);                
@@ -84,6 +77,8 @@ namespace UnityMultiplayer.Server
                 _networkChannels.Add(networkChannel);
                 _hostToChannel[remote] = networkChannel;
                 newChannels.Add(networkChannel);
+
+                Debug.Log($"Incoming connection from {remote.Address}:{remote.Port}");
             }
             return newChannels;
         }

@@ -29,6 +29,17 @@ namespace Assets.Scripts.Handlers
             int transformHash = NetTransform.RegisterNewNetObject(player);
             Ownership.AddOwned(networkChannel, transformHash);
 
+            IEnumerable<PlayerInformation> playerInformation = PlayerDatabase.players.Keys
+                .Select(net => new PlayerInformation(
+                    PlayerDatabase.GetName(net),
+                    net.ChannelID,
+                    PlayerDatabase.GetNetTransform(net).transformHash,
+                    new Utils.SerializableVector3(PlayerDatabase.GetPosition(net)),
+                    new Utils.SerializableVector3(PlayerDatabase.GetRotation(net))
+                    ));
+            WorldStateMessage world = new WorldStateMessage(playerInformation);
+            networkChannel.Send(world, DatagramType.WorldState);
+
             PlayerDatabase.players[networkChannel] = player;
 
             PlayerJoinMessage playerJoinMessage = new PlayerJoinMessage(request.name, networkChannel.ChannelID, transformHash, spawnPosition);

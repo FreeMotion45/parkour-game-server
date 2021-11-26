@@ -36,12 +36,8 @@ namespace Assets.Scripts.Server
                     netTransforms.Select(nt => nt.transformHash),
                     netTransforms.Select(nt => nt.transform.position),
                     netTransforms.Select(nt => nt.transform.eulerAngles)
-                    );
-
-                foreach (NetworkChannel channel in PlayerDatabase.players.Keys)
-                {
-                    PlayerDatabase.Publish(playerTransformsMessage, DatagramType.TransformsUpdate);
-                }
+                    );                
+                PlayerDatabase.Publish(playerTransformsMessage, DatagramType.TransformsUpdate);                
             }            
         }
 

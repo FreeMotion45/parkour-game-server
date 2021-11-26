@@ -18,5 +18,6 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams
         PlayerJoin,
         MoveTransform,
         TransformsUpdate,
+        WorldState,
     }
 }

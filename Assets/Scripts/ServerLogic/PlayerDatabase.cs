@@ -26,6 +26,26 @@ namespace Assets.Scripts.ServerLogic
             }
         }
 
+        public static string GetName(BaseNetworkChannel channel)
+        {
+            return players[channel].name;
+        }
+
+        public static Vector3 GetPosition(BaseNetworkChannel channel)
+        {
+            return players[channel].transform.position;
+        }
+
+        public static Vector3 GetRotation(BaseNetworkChannel channel)
+        {
+            return players[channel].transform.eulerAngles;
+        }
+
+        public static NetTransform GetNetTransform(BaseNetworkChannel channel)
+        {
+            return players[channel].GetComponent<NetTransform>();
+        }
+
         public void OnDisconnect(BaseNetworkChannel disconnectedChannel)
         {
             if (players.ContainsKey(disconnectedChannel))

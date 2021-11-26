@@ -34,6 +34,7 @@ namespace UnityMultiplayer.Shared.Networking
             _shouldConnect = true;
         }
 
+        public bool PerformedHandshake => ReliableChannel.PerformedHandshake;
         public ReliableNetworkClient ReliableChannel { get; private set; }
         public UnreliableNetworkClient UnreliableChannel { get; private set; }
         public IPEndPoint RemoteEndPoint => ReliableChannel.RemoteEndPoint;

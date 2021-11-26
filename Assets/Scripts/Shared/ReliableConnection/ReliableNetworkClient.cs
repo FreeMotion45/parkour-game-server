@@ -17,6 +17,7 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
     public class ReliableNetworkClient : IDisposable
     {
         private bool _disposed;
+        private bool _triedToConnect;
 
         private BufferBlock<DatagramHolder> _sendQueue;
         private CancellationTokenSource _sendCancellationToken;
@@ -32,8 +33,7 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
         {
             Client = new TcpClient();
             _messager = messageReader;
-            _serializer = serializer;
-            _remoteEndPoint = remoteEndPoint;
+            _serializer = serializer;            
         }
 
         public ReliableNetworkClient(TcpClient client,
@@ -43,6 +43,7 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
             Client = client;
             _messager = messager;
             _serializer = serializer;
+            _remoteEndPoint = (IPEndPoint)client.Client.RemoteEndPoint;
         }
 
         public TcpClient Client { get; }
@@ -51,13 +52,25 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
         public IPEndPoint RemoteEndPoint => _remoteEndPoint;
         public IPEndPoint LocalEndPoint => (IPEndPoint)Client.Client.LocalEndPoint;
         public bool IsConnected => Client.Connected;
+        public bool PerformedHandshake { get; private set; }
 
         public void Connect()
         {
+            if (_triedToConnect)
+                throw new Exception("Tried to perfrom a connection with the same connection more than once.");
+            _triedToConnect = true;
+
             if (!Client.Connected)
             {
+                // Then this is the client.
                 Client.Connect(_remoteEndPoint);
+                ClientConfirmHandshake();
+                Debug.Log("Successfully performed handshake with the server.");
             }
+
+            // The `else` clause is a server handler.
+            // The reason lies in the fact that we do not want to block the server with a blocking call
+            // to `Read` from the network stream.
 
             _sendCancellationToken = new CancellationTokenSource();
             _sendQueue = new BufferBlock<DatagramHolder>();
@@ -82,12 +95,14 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
 
         public void SendDatagramHolder(DatagramHolder datagramHolder)
         {
+            DisallowSendIfHandshakeNotPerformed(datagramHolder);
             if (!IsConnected) return;
             _messager.WriteMessage(Client, _serializer.Serialize(datagramHolder));
         }
 
         public void AsyncSendDatagramHolder(DatagramHolder datagramHolder)
         {
+            DisallowSendIfHandshakeNotPerformed(datagramHolder);
             if (!IsConnected) return;
             _sendQueue.Post(datagramHolder);
         }
@@ -97,6 +112,40 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
             return _messager.ReadAvailableMessages(Client)
                 .Select(messageBytes => _serializer.Deserialize(messageBytes))
                 .ToArray();
+        }
+
+        public DatagramHolder ReadOneMessage()
+        {
+            return _serializer.Deserialize(_messager.ReadOneMessages(Client));
+        }
+
+        private void ClientConfirmHandshake()
+        {
+            SendDatagramHolder(new DatagramHolder(DatagramType.Handshake, null));
+            DatagramHolder handshakeConfirm = ReadOneMessage();
+
+            if (handshakeConfirm.DatagramType != DatagramType.Handshake)
+                throw new Exception("Handshake failed with server. Make sure the server is set up correctly.");
+
+            PerformedHandshake = true;
+        }
+
+        private void ServerConfirmHandshake()
+        {
+            DatagramHolder handshakeRequest = ReadOneMessage();
+            if (handshakeRequest.DatagramType != DatagramType.Handshake)
+                throw new Exception("Handshake failed with client. Make sure the client is set up correctly.");
+            AsyncSendDatagramHolder(new DatagramHolder(DatagramType.Handshake, null));
+            PerformedHandshake = true;
+        }
+
+        private void DisallowSendIfHandshakeNotPerformed(DatagramHolder datagram)
+        {
+            if (!PerformedHandshake)
+            {
+                if (datagram.DatagramType != DatagramType.Handshake)
+                    throw new Exception("Can't send messages over the reliable network connection before a successfull handshake.");
+            }
         }
 
         private async Task SendLoopAsync()

@@ -15,17 +15,22 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityMultiplayer.Shared.Networking.Datagrams.Handling;
 using Assets.Scripts.Shared;
+using Assets.Scripts.Server.Handlers;
 
 namespace UnityMultiplayer.Server
 {
-    class PacketManager : MonoBehaviour
+    class UnityMultiplayerServer : MonoBehaviour
     {
-        [SerializeField] private BaseGameObjectSerializer _serializer;
-        [SerializeField] private DatagramHandlerResolver _datagramHandlerResolver;
         [SerializeField] private string _hostIP;
         [SerializeField] private int _hostPort;
+        [Space]
+        [SerializeField] private DatagramHandlerResolver _datagramHandlerResolver;        
+        [Space]
+        [SerializeField] private BaseGameObjectSerializer _serializer;
 
         private List<BaseNetworkChannel> _networkChannels;
+        private List<BaseNetworkChannel> _nonHandshakedChannels;
+
         private Dictionary<IPEndPoint, NetworkChannel> _hostToChannel;        
         private IPEndPoint _localEndPoint;
         private ReliableNetworkListener _reliableNetworkListener;        
@@ -38,11 +43,15 @@ namespace UnityMultiplayer.Server
         public void Start()
         {            
             _networkChannels = new List<BaseNetworkChannel>();
+            _nonHandshakedChannels = new List<BaseNetworkChannel>();
             _hostToChannel = new Dictionary<IPEndPoint, NetworkChannel>();            
             _localEndPoint = new IPEndPoint(IPAddress.Parse(_hostIP), _hostPort);
 
             _reliableNetworkListener = new ReliableNetworkListener(_localEndPoint, new ReliableNetworkMessager(), _serializer);
-            _unreliableNetworkListener = new UnreliableNetworkListener(_localEndPoint, _hostToChannel, _serializer);            
+            _unreliableNetworkListener = new UnreliableNetworkListener(_localEndPoint, _hostToChannel, _serializer);
+
+            _datagramHandlerResolver.AddHandler(DatagramType.Handshake, new HandshakeHandler());
+
             _reliableNetworkListener.Start();
         }        
 
@@ -74,9 +83,9 @@ namespace UnityMultiplayer.Server
 
                 NetworkChannel networkChannel = new NetworkChannel(client, unreliableNetworkClient, clientId);
 
-                _networkChannels.Add(networkChannel);
+                //_networkChannels.Add(networkChannel);
                 _hostToChannel[remote] = networkChannel;
-                newChannels.Add(networkChannel);
+                _nonHandshakedChannels.Add(networkChannel);
 
                 Debug.Log($"Incoming connection from {remote.Address}:{remote.Port}");
             }
@@ -89,6 +98,8 @@ namespace UnityMultiplayer.Server
             // Unreliable connection is not really a connection.
             // We virtually insert datagrams into it by reading from the network into the channel.
             _unreliableNetworkListener.ReadIntoChannels();
+
+            AcceptHandshakes();
 
             foreach (NetworkChannel networkChannel in _networkChannels)
             {
@@ -103,6 +114,21 @@ namespace UnityMultiplayer.Server
                 foreach (DatagramHolder message in allMessages)
                 {
                     ProcessMessage(message, networkChannel);
+                }
+            }
+        }
+
+        private void AcceptHandshakes()
+        {
+            foreach (NetworkChannel nonHandshakedClient in _nonHandshakedChannels.ToArray())
+            {
+                foreach (DatagramHolder handshake in nonHandshakedClient.ReliableChannel.ReadAvailableMessages())
+                {
+                    if (handshake.DatagramType == DatagramType.Handshake)
+                    {
+                        ProcessMessage(handshake, nonHandshakedClient);
+                        _networkChannels.Add(nonHandshakedClient);
+                    }
                 }
             }
         }

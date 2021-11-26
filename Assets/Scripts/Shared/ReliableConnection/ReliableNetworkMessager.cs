@@ -49,6 +49,21 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
             return dataReceived;
         }
 
+        public byte[] ReadOneMessages(TcpClient client)
+        {
+            byte[] lengthBytes = new byte[4];
+            if (client.Connected)
+            {
+                NetworkStream network = client.GetStream();
+                network.Read(lengthBytes, 0, lengthBytes.Length);
+                int messageLength = BitConverter.ToInt32(lengthBytes, 0);
+                byte[] messageBytes = new byte[messageLength];
+                network.Read(messageBytes, 0, messageLength);
+                return messageBytes;
+            }
+            return new byte[0];
+        }
+
         private byte[] ConstructMessage(byte[] message)
         {
             byte[] fullMessageBuffer = new byte[4 + message.Length];

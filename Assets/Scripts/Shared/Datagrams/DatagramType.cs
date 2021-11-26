@@ -8,10 +8,10 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams
 {
     public enum DatagramType
     {
-        Transform,
-        AbsoluteTransform,
-        Instantiate,
+        // For default handlers.
+        Handshake,        
+        Disconnect,
         UnreliableKeepAlive,
-        Inputs,
+        // Everything else below.
     }
 }

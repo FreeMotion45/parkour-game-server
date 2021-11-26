@@ -7,35 +7,35 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityMultiplayer.Shared.Networking.Datagrams;
 using UnityMultiplayer.Shared.Networking.SecureConnection;
+using UnityMultiplayer.Shared.Networking.Serializers;
 
 namespace UnityMultiplayer.Shared.Networking
 {
-    public class NetworkChannel : INetworkChannel
+    public class NetworkChannel : BaseNetworkChannel, IDisposable
     {
+        private bool _disposed;
+        private bool _shouldConnect;
+
         public NetworkChannel(ReliableNetworkClient reliableChannel, UnreliableNetworkClient unreliableChannel)
         {
             ReliableChannel = reliableChannel;
             UnreliableChannel = unreliableChannel;
+
+            // We receive channels that are already opened.
+            _shouldConnect = false;
+        }
+
+        public NetworkChannel(IPEndPoint remoteEndPoint, BaseGameObjectSerializer serializer)
+        {
+            // We need to create and connect the channels.
+            ReliableChannel = new ReliableNetworkClient(remoteEndPoint, new ReliableNetworkMessager(), serializer);
+            _shouldConnect = true;
         }
 
         public ReliableNetworkClient ReliableChannel { get; private set; }
         public UnreliableNetworkClient UnreliableChannel { get; private set; }
-        public IPEndPoint RemoteEndPoint { get => (IPEndPoint)ReliableChannel.Client.Client.RemoteEndPoint; }
-        public bool IsConnected { get => UnreliableChannel.IsConnected && ReliableChannel.IsConnected; }
-
-        public void Send(DatagramHolder data, TransportType transportType = TransportType.Reliable)
-        {
-            if (transportType == TransportType.Reliable)
-                ReliableChannel.AsyncSendDatagramHolder(data);
-
-            else if (transportType == TransportType.Unreliable)
-                UnreliableChannel.SendDatagramHolder(data);
-        }
-
-        public void Send(object data, DatagramType datagramType, TransportType transportType = TransportType.Reliable)
-        {
-            Send(new DatagramHolder(datagramType, data), transportType);
-        }
+        public IPEndPoint RemoteEndPoint => ReliableChannel.RemoteEndPoint;
+        public bool IsConnected => UnreliableChannel.IsConnected && ReliableChannel.IsConnected;
 
         public DatagramHolder[] GetAllReliableAndUnreliableMessages()
         {
@@ -50,16 +50,41 @@ namespace UnityMultiplayer.Shared.Networking
         public void Connect()
         {
             ReliableChannel.Connect();
+
+            if (_shouldConnect)
+            {
+                // We can only bind to the same local port after we know on which port the TCP connection is binded to.
+                UnreliableChannel = new UnreliableNetworkClient(RemoteEndPoint, ReliableChannel.Serializer, ReliableChannel.LocalEndPoint);
+                UnreliableChannel.ThisInitiatedConnection = true;
+            }
+
             UnreliableChannel.Connect();
         }
 
-        public void Close()
+        public void Disconnect()
         {
+            if (_disposed) return;
+            _disposed = true;
+
             ReliableChannel.Disconnect();
             ReliableChannel = null;
 
             UnreliableChannel.Disconnect();
             UnreliableChannel = null;
+        }
+
+        public void Dispose()
+        {
+            if (_disposed) return;
+            Disconnect();
+        }
+
+        public override void Send(DatagramHolder data, TransportType transportType = TransportType.Reliable)
+        {
+            if (transportType == TransportType.Reliable)
+                ReliableChannel.AsyncSendDatagramHolder(data);
+            else
+                UnreliableChannel.SendDatagramHolder(data);
         }
     }
 }

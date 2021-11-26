@@ -11,8 +11,10 @@ using UnityMultiplayer.Shared.Networking.Datagrams;
 
 namespace UnityMultiplayer.Shared.Networking
 {
-    public class UnreliableNetworkClient
+    public class UnreliableNetworkClient : IDisposable
     {
+        private bool _disposed;
+
         private const int KEEP_ALIVE_INTERVAL = 240; // MS
         private UdpClient _udpClient;
         private BaseGameObjectSerializer _serializer;
@@ -52,12 +54,25 @@ namespace UnityMultiplayer.Shared.Networking
         public bool ThisInitiatedConnection { get; set; }
         public bool IsConnected { get; private set; }
 
+        public void SetLocalEndPoint(IPEndPoint localEndPoint)
+        {
+            if (_disposed || IsConnected)
+                throw new InvalidOperationException("Cant set local endpoint of a connected or disposed UDP connection.");
+
+            _udpClient.Close();
+            _udpClient.Dispose();
+            _udpClient = new UdpClient(localEndPoint);
+        }
+
         public void Connect()
         {
+            if (IsConnected) return;
+
             if (ThisInitiatedConnection)
             {
                 _udpClient.Connect(_remote);
             }
+
             IsConnected = true;
             _lastKeepAliveReceived = DateTime.Now;
             _lastKeepAliveSent = DateTime.Now;
@@ -66,12 +81,21 @@ namespace UnityMultiplayer.Shared.Networking
 
         public void Disconnect()
         {
+            if (_disposed) return;
+            _disposed = true;
+
             IsConnected = false;
             if (ThisInitiatedConnection)
             {
                 _udpClient.Close();
                 _udpClient.Dispose();
             }
+        }
+
+        public void Dispose()
+        {
+            if (_disposed) return;
+            Disconnect();
         }
 
         public void VirtuallyFillMessageQueue(DatagramHolder datagramHolder)
@@ -106,7 +130,7 @@ namespace UnityMultiplayer.Shared.Networking
                         byte[] datagram = _udpClient.Receive(ref sender);
                         DatagramHolder dgram = _serializer.Deserialize(datagram);
                         if (dgram.DatagramType == DatagramType.UnreliableKeepAlive)
-                        {                            
+                        {
                             _lastKeepAliveReceived = DateTime.Now;
                             continue;
                         }
@@ -132,7 +156,7 @@ namespace UnityMultiplayer.Shared.Networking
                 {
                     DatagramHolder dgram = _insertedMessages.Dequeue();
                     if (dgram.DatagramType == DatagramType.UnreliableKeepAlive)
-                    {                        
+                    {
                         _lastKeepAliveReceived = DateTime.Now;
                         continue;
                     }
@@ -185,7 +209,7 @@ namespace UnityMultiplayer.Shared.Networking
             }
             else if (millisecondsSinceLastSent >= KEEP_ALIVE_INTERVAL * 0.9)
             {
-                SendKeepAlive();                
+                SendKeepAlive();
                 _lastKeepAliveSent = DateTime.Now;
             }
         }

@@ -3,21 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Assets.Scripts.Utils
 {
-    public struct TrackedVector3
+    public struct TrackedValue<T>
     {
-        public Vector3 latest;
-        public Vector3 previous;
+        public T latest;
+        public T previous;
 
-        public TrackedVector3(Vector3 startingValue)
+        public TrackedValue(T startingValue)
         {
             previous = latest = startingValue;
         }
 
-        public void Track(Vector3 vec)
+        public void Track(T vec)
         {
             previous = latest;
             latest = vec;
@@ -25,7 +24,7 @@ namespace Assets.Scripts.Utils
 
         public bool Changed()
         {
-            return latest != previous;
+            return !latest.Equals(previous);
         }
     }
 }

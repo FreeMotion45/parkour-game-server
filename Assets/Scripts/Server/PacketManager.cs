@@ -16,6 +16,7 @@ using UnityEngine;
 using UnityMultiplayer.Shared.Networking.Datagrams.Handling;
 using Assets.Scripts.Shared;
 using Assets.Scripts.Server.Handling.Default;
+using Assets.Scripts.Server;
 
 namespace UnityMultiplayer.Server
 {
@@ -26,17 +27,17 @@ namespace UnityMultiplayer.Server
         [SerializeField] private string _hostIP;
         [SerializeField] private int _hostPort;
 
-        private List<INetworkChannel> _networkChannels;
+        private List<BaseNetworkChannel> _networkChannels;
         private Dictionary<IPEndPoint, NetworkChannel> _hostToChannel;        
         private IPEndPoint _localEndPoint;
         private ReliableNetworkListener _reliableNetworkListener;        
         private UnreliableNetworkListener _unreliableNetworkListener;
 
-        public IReadOnlyList<INetworkChannel> NetworkChannels => _networkChannels;        
+        public IReadOnlyList<BaseNetworkChannel> NetworkChannels => _networkChannels;        
 
         public void Start()
         {            
-            _networkChannels = new List<INetworkChannel>();
+            _networkChannels = new List<BaseNetworkChannel>();
             _hostToChannel = new Dictionary<IPEndPoint, NetworkChannel>();            
             _localEndPoint = new IPEndPoint(IPAddress.Parse(_hostIP), _hostPort);
 
@@ -47,7 +48,7 @@ namespace UnityMultiplayer.Server
             _datagramHandlerResolver.AddHandler(DatagramType.Inputs, new NetInputsHandler());
             _datagramHandlerResolver.AddHandler(DatagramType.AbsoluteTransform, new NetAbsoluteTransformHandler());
 
-            GigaNetGlobals.packetManager = this;
+            GigaNetServerGlobals.packetManager = this;
         }        
 
         public void OnDisable()
@@ -56,7 +57,7 @@ namespace UnityMultiplayer.Server
             _unreliableNetworkListener.CloseListener();
             foreach (NetworkChannel channel in _networkChannels)
             {
-                channel.Close();
+                channel.Dispose();
             }
             _networkChannels.Clear();
         }

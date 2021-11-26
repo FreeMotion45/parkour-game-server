@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Shared.Datagrams.Handling;
+﻿using Assets.Scripts.Server.Behaviours;
+using Assets.Scripts.Shared.Datagrams.Handling;
 using Assets.Scripts.Shared.Datagrams.Messages;
 using Assets.Scripts.Utils;
 using System;
@@ -18,8 +19,8 @@ namespace Assets.Scripts.Server.Handling.Default
         public void Handle(DatagramHolder deserializedDatagram, NetworkChannel networkChannel)
         {
             NetInputMessage netBytesMessage = (NetInputMessage)deserializedDatagram.Data;
-            
-            NetTransform netTransform = NetTransform.networkTransforms[netBytesMessage.transformHash];
+
+            ServerNetTransform netTransform = ServerNetTransform.networkTransforms[netBytesMessage.transformHash];
             if (!netInputs.ContainsKey(netTransform.hash))
                 netInputs.Add(netTransform.hash, netTransform.GetComponent<ServerNetInputs>());
 

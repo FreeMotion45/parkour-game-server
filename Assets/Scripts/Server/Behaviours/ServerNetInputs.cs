@@ -1,4 +1,6 @@
-﻿using Assets.Scripts.Server.Inputs;
+﻿using Assets.Scripts.Server;
+using Assets.Scripts.Server.Behaviours;
+using Assets.Scripts.Server.Inputs;
 using Assets.Scripts.Shared;
 using Assets.Scripts.Shared.Datagrams.Messages;
 using Assets.Scripts.Utils;
@@ -17,6 +19,7 @@ public struct Axis
     public string negative;
 }
 
+[RequireComponent(typeof(ServerNetTransform))]
 class ServerNetInputs : MonoBehaviour, INetInputSource
 {
     [Header("Network controls")]
@@ -64,7 +67,7 @@ class ServerNetInputs : MonoBehaviour, INetInputSource
     {
         if (inputRigidbody != null)
         {
-            GigaNetGlobals.physics.Simulate(inputRigidbody);
+            GigaNetServerGlobals.physics.Simulate(inputRigidbody);
         }
     }
 

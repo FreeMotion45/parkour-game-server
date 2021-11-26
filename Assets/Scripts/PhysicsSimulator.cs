@@ -1,3 +1,4 @@
+using Assets.Scripts.Server;
 using Assets.Scripts.Shared;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ public class PhysicsSimulator : MonoBehaviour
             Physics.autoSimulation = false;
 
         RescanSceneForRigidbodies();
-        GigaNetGlobals.physics = this;
+        GigaNetServerGlobals.physics = this;
     }
 
     public void Simulate(Rigidbody sim)

@@ -1,4 +1,6 @@
-﻿using Assets.Scripts.Shared.Datagrams.Messages;
+﻿using Assets.Scripts.Server;
+using Assets.Scripts.Server.Behaviours;
+using Assets.Scripts.Shared.Datagrams.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,14 +15,14 @@ namespace Assets.Scripts.Shared.Behaviours
     {
         public float interpolationTime = 0.2f;
 
-        private List<NetTransform> interpolatedNetTransforms;
+        private List<ServerNetTransform> interpolatedNetTransforms;
         private float nextTimeToSendMessage;
 
         private void Start()
         {
-            interpolatedNetTransforms = new List<NetTransform>();            
+            interpolatedNetTransforms = new List<ServerNetTransform>();            
             nextTimeToSendMessage = Time.time + interpolationTime;
-            GigaNetGlobals.interpolationManager = this;
+            GigaNetServerGlobals.interpolationManager = this;
         }
 
         private void Update()
@@ -32,12 +34,12 @@ namespace Assets.Scripts.Shared.Behaviours
             }
         }
 
-        public void Add(NetTransform netTransform)
+        public void Add(ServerNetTransform netTransform)
         {
             interpolatedNetTransforms.Add(netTransform);
         }
 
-        public void Remove(NetTransform netTransform)
+        public void Remove(ServerNetTransform netTransform)
         {
             if (interpolatedNetTransforms.Contains(netTransform))
             {
@@ -47,13 +49,13 @@ namespace Assets.Scripts.Shared.Behaviours
 
         private void PublishNetTransformUpdate()
         {
-            foreach (NetTransform netTransform in interpolatedNetTransforms)
+            foreach (ServerNetTransform netTransform in interpolatedNetTransforms)
             {
                 UpdateNetTransformMessage updateNetTransform = new UpdateNetTransformMessage(
                     netTransform.transform.position,
                     netTransform.transform.eulerAngles,
                     NetworkMovement.Interpolated, netTransform.hash);
-                GigaNetGlobals.PublishMessage(updateNetTransform, DatagramType.Transform);
+                GigaNetServerGlobals.PublishMessage(updateNetTransform, DatagramType.Transform);
             }            
         }
     }

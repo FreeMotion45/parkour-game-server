@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Shared.Datagrams.Handling;
+﻿using Assets.Scripts.Server.Behaviours;
+using Assets.Scripts.Shared.Datagrams.Handling;
 using Assets.Scripts.Shared.Datagrams.Messages;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace Assets.Scripts.Server.Handling.Default
         public void Handle(DatagramHolder deserializedDatagram, NetworkChannel networkChannel)
         {
             NetAbsoluteTransform netAbsoluteTransform = (NetAbsoluteTransform)deserializedDatagram.Data;
-            NetTransform netTransform = NetTransform.networkTransforms[netAbsoluteTransform.transformHash];
+            ServerNetTransform netTransform = ServerNetTransform.networkTransforms[netAbsoluteTransform.transformHash];
             netTransform.transform.position = netAbsoluteTransform.position.Get();
             netTransform.transform.eulerAngles = netAbsoluteTransform.eulerAngles.Get();
         }

@@ -46,8 +46,11 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
         }
 
         public TcpClient Client { get; }
+        public BaseGameObjectSerializer Serializer => _serializer;
         public bool RemoteOpen { get; private set; }
-        public bool IsConnected { get => Client.Connected; }
+        public IPEndPoint RemoteEndPoint => _remoteEndPoint;
+        public IPEndPoint LocalEndPoint => (IPEndPoint)Client.Client.LocalEndPoint;
+        public bool IsConnected => Client.Connected;
 
         public void Connect()
         {
@@ -68,12 +71,12 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
 
             _sendCancellationToken.Cancel();
             Client.Close();
-            _sendLoopTask.Wait();            
-            Client.Dispose();            
+            _sendLoopTask.Wait();
+            Client.Dispose();
         }
 
         public void Dispose()
-        {            
+        {
             Disconnect();
         }
 
@@ -86,7 +89,7 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
         public void AsyncSendDatagramHolder(DatagramHolder datagramHolder)
         {
             if (!IsConnected) return;
-            _sendQueue.Post(datagramHolder);            
+            _sendQueue.Post(datagramHolder);
         }
 
         public DatagramHolder[] ReadAvailableMessages()
@@ -112,7 +115,7 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
                 }
                 catch (Exception exc)
                 {
-                    // This means that we can't send a a message because the client is closed.
+                    // This means that we can't send a message because the client is closed.
                     // Its also OK.
                     RemoteOpen = false;
                     break;

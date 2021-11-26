@@ -1,3 +1,4 @@
+using Assets.Scripts.Server.Behaviours;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,7 +8,7 @@ public class NetTestScript : MonoBehaviour
     public string prefab;
     public Transform spawnpoint;
 
-    public NetTransform netTransform;
+    public ServerNetTransform netTransform;
     public float moveSpeed = 1;
     public float rotSpeed = 10;
 
@@ -16,7 +17,7 @@ public class NetTestScript : MonoBehaviour
     // Start is called before the first frame update
     public void CreateNetTransform()
     {
-        netTransform = NetTransform.NetInstantiate(prefab, spawnpoint.position).GetComponent<NetTransform>();
+        netTransform = ServerNetTransform.NetInstantiate(prefab, spawnpoint.position).GetComponent<ServerNetTransform>();
     }
 
     //private void Update()

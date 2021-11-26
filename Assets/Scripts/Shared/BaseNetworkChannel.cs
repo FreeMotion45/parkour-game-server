@@ -7,11 +7,11 @@ using UnityMultiplayer.Shared.Networking.Datagrams;
 
 namespace Assets.Scripts.Shared
 {
-    public interface INetworkChannel
+    public abstract class BaseNetworkChannel
     {
-        void Send(DatagramHolder data, TransportType transportType = TransportType.Reliable);
+        public abstract void Send(DatagramHolder data, TransportType transportType = TransportType.Reliable);
 
-        void Send(object data, DatagramType datagramType, TransportType transportType = TransportType.Reliable)
+        public void Send(object data, DatagramType datagramType, TransportType transportType = TransportType.Reliable)
         {
             Send(new DatagramHolder(datagramType, data), transportType);
         }

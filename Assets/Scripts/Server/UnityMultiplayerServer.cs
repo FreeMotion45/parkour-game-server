@@ -15,7 +15,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityMultiplayer.Shared.Networking.Datagrams.Handling;
 using Assets.Scripts.Shared;
-using Assets.Scripts.Server.Handlers;
 
 namespace UnityMultiplayer.Server
 {
@@ -30,11 +29,11 @@ namespace UnityMultiplayer.Server
 
         private List<BaseNetworkChannel> _networkChannels;
         private List<BaseNetworkChannel> _nonHandshakedChannels;
+        private Dictionary<IPEndPoint, NetworkChannel> _hostToChannel; // Linking TCP connections to their UDP counter parts.
 
-        private Dictionary<IPEndPoint, NetworkChannel> _hostToChannel;        
         private IPEndPoint _localEndPoint;
         private ReliableNetworkListener _reliableNetworkListener;        
-        private UnreliableNetworkListener _unreliableNetworkListener;
+        private UnreliableNetworkListener _unreliableNetworkListener;        
 
         private int clientId;
 
@@ -48,9 +47,7 @@ namespace UnityMultiplayer.Server
             _localEndPoint = new IPEndPoint(IPAddress.Parse(_hostIP), _hostPort);
 
             _reliableNetworkListener = new ReliableNetworkListener(_localEndPoint, new ReliableNetworkMessager(), _serializer);
-            _unreliableNetworkListener = new UnreliableNetworkListener(_localEndPoint, _hostToChannel, _serializer);
-
-            _datagramHandlerResolver.AddHandler(DatagramType.Handshake, new HandshakeHandler());
+            _unreliableNetworkListener = new UnreliableNetworkListener(_localEndPoint, _hostToChannel, _serializer);            
 
             _reliableNetworkListener.Start();
         }        
@@ -101,14 +98,15 @@ namespace UnityMultiplayer.Server
 
             AcceptHandshakes();
 
-            foreach (NetworkChannel networkChannel in _networkChannels)
+            foreach (NetworkChannel networkChannel in _networkChannels.ToArray())
             {
                 DatagramHolder[] allMessages = networkChannel.GetAllReliableAndUnreliableMessages();
                 if (!networkChannel.IsConnected)
                 {
-                    // TODO: Uncomment these and implement them in a normal manner.
-                    // ClientDataHolder.RemoveClient(networkChannel.RemoteEndPoint);
-                    //_hostToChannel.Remove(networkChannel.RemoteEndPoint);
+                    Debug.Log("Client disconnected without disconnect request...");
+                    _networkChannels.Remove(networkChannel);
+                    _hostToChannel.Remove(networkChannel.RemoteEndPoint);
+                    networkChannel.Dispose();
                     continue;
                 }
                 foreach (DatagramHolder message in allMessages)
@@ -122,12 +120,19 @@ namespace UnityMultiplayer.Server
         {
             foreach (NetworkChannel nonHandshakedClient in _nonHandshakedChannels.ToArray())
             {
-                foreach (DatagramHolder handshake in nonHandshakedClient.ReliableChannel.ReadAvailableMessages())
+                foreach (DatagramHolder handshake in nonHandshakedClient.GetAllReliableAndUnreliableMessages())
                 {
+                    var remote = nonHandshakedClient.RemoteEndPoint;
                     if (handshake.DatagramType == DatagramType.Handshake)
                     {
-                        ProcessMessage(handshake, nonHandshakedClient);
-                        _networkChannels.Add(nonHandshakedClient);
+                        nonHandshakedClient.Send(null, DatagramType.Handshake);                        
+                        Debug.Log($"Successfully performed hand shake with: {remote.Address}:{remote.Port}");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Client {remote.Address}:{remote.Port} did not send a handshake before sending data.");
+                        nonHandshakedClient.Dispose();
+                        _nonHandshakedChannels.Remove(nonHandshakedClient);
                     }
                 }
             }

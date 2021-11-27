@@ -56,7 +56,7 @@ namespace Assets.Scripts.Handlers
                     return new PlayerInformation(network.ChannelID, position, rotation);
                 });
 
-            WorldStateMessage world = new WorldStateMessage(playerInformation);
+            OnJoinWorldState world = new OnJoinWorldState(playerInformation);
             channel.Send(world, DatagramType.WorldState);
         }
     }

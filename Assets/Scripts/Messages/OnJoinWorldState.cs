@@ -24,11 +24,11 @@ namespace Assets.Scripts.Messages
     }
 
     [Serializable]
-    class WorldStateMessage
+    class OnJoinWorldState
     {
         public PlayerInformation[] playerInformation;
 
-        public WorldStateMessage(IEnumerable<PlayerInformation> playerInformation)
+        public OnJoinWorldState(IEnumerable<PlayerInformation> playerInformation)
         {
             this.playerInformation = playerInformation.ToArray();
         }

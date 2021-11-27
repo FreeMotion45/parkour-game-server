@@ -12,7 +12,8 @@ namespace Assets.Scripts.Utils
         private readonly static BitWriter bitWriter = new BitWriter();
         private readonly static BitReader bitReader = new BitReader();
 
-        private readonly static int BIT_PRECISION = 11;
+        // 2 + 1 + 12 * 3 = 39. Sadly, we have 1 unutilized bit...
+        private readonly static int BIT_PRECISION = 12;
         private readonly static int QUATERNION_PRECISION_VALUE = (int)((Math.Pow(2, BIT_PRECISION) / 2) - 1);
 
         public static byte[] SerializeQuaternion(Quaternion q)
@@ -44,7 +45,7 @@ namespace Assets.Scripts.Utils
             bitWriter.WriteBits(smallestThree[1], BIT_PRECISION);
             bitWriter.WriteBits(smallestThree[2], BIT_PRECISION);
 
-            // Result bytes sized 2 + 1 + 11 * 3 = 27 bytes.
+            // Result bytes sized 2 + 1 + 12 * 3 = 39 bytes.
             return bitWriter.GetByteArrayAndClear();
         }
 

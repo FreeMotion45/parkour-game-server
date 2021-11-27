@@ -13,25 +13,32 @@ namespace Assets.Scripts.ServerLogic.Player
         public static readonly Vector3 viewportCenter = new Vector3(0.5f, 0.5f, 0);
 
         public Camera playerCamera;
-        public float maxShootingDistance;
-        public LayerMask hittableLayers;
+        public float maxShootingDistance;        
 
         private ProjectileDispatcher projectileDispatcher;
+        private Quaternion q;
 
         private void Start()
         {
             projectileDispatcher = new ProjectileDispatcher();
         }
 
-        public GameObject Shoot(Quaternion playerRotation)
+        public GameObject Shoot(Quaternion playerRotation, LayerMask mask)
         {
+            q = playerRotation;
             Vector3 middleOfScreenInWorldSpace = playerCamera.ViewportToWorldPoint(viewportCenter);
             bool hitAnything = projectileDispatcher.RaycastBullet(playerRotation, middleOfScreenInWorldSpace,
-                hittableLayers, maxShootingDistance, out RaycastHit info);
+                mask, maxShootingDistance, out RaycastHit info);
 
             if (hitAnything)
                 return info.collider.gameObject;
             return null;
+        }
+
+        private void OnDrawGizmos()
+        {
+            Vector3 middleOfScreenInWorldSpace = playerCamera.ViewportToWorldPoint(viewportCenter);
+            Gizmos.DrawLine(middleOfScreenInWorldSpace, maxShootingDistance * (q * Vector3.forward) + middleOfScreenInWorldSpace);
         }
     }
 }

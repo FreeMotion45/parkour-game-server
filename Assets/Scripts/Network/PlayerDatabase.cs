@@ -26,6 +26,17 @@ namespace Assets.Scripts.ServerLogic
             }
         }
 
+        public static void Publish(DatagramHolder data,            
+            NetworkChannel sender = null,
+            TransportType transport = TransportType.Reliable)
+        {
+            foreach (NetworkChannel channel in players.Keys)
+            {
+                if (sender == channel) continue;
+                channel.Send(data, transport);
+            }
+        }
+
         public static string GetName(BaseNetworkChannel channel)
         {
             return players[channel].name;

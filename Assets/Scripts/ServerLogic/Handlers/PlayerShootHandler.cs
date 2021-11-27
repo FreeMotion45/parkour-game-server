@@ -16,15 +16,34 @@ using UnityMultiplayer.Shared.Networking.Datagrams.Handling;
 namespace Assets.Scripts.Handlers
 {
     class PlayerShootHandler : BaseBehaviourDatagramHandler
-    {        
+    {
+        private readonly string PLAYER_SHOOT_IGNORE_LAYER = "Player Shoot Ignore";
+
+        private LayerMask temporaryLayer;
+
+        private void Start()
+        {
+            temporaryLayer = LayerMask.NameToLayer(PLAYER_SHOOT_IGNORE_LAYER);
+        }
+
+        public LayerMask hittableLayers;
+
         public override void Handle(DatagramHolder deserializedDatagram, NetworkChannel networkChannel)
         {
+            PlayerDatabase.Publish(deserializedDatagram, sender: networkChannel);
+
             // Get initial data.
             PlayerShootMessage message = (PlayerShootMessage)deserializedDatagram.Data;
             Quaternion playerRotation = message.Rotation;
 
-            Gun playerGun = PlayerDatabase.GetComponent<Gun>(networkChannel);
-            GameObject objectHit = playerGun.Shoot(playerRotation);
+            GameObject player = PlayerDatabase.GetPlayerObject(networkChannel);
+            int originalLayer = player.layer;
+            player.layer = temporaryLayer;
+
+            Gun playerGun = PlayerDatabase.GetComponent<Gun>(networkChannel);            
+            GameObject objectHit = playerGun.Shoot(playerRotation, hittableLayers);
+
+            player.layer = originalLayer;
 
             if (objectHit != null)
             {

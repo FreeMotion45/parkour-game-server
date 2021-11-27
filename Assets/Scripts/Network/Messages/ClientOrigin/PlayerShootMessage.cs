@@ -11,13 +11,16 @@ namespace Assets.Scripts.Messages.ClientOrigin
     [Serializable]
     class PlayerShootMessage
     {
+        public int clientId;
+
         public float x;
         public float y;
         public float z;
         public float w;
 
-        public PlayerShootMessage(Quaternion rotation)
+        public PlayerShootMessage(int clientId, Quaternion rotation)
         {
+            this.clientId = clientId;
             Rotation = rotation;
         }
 

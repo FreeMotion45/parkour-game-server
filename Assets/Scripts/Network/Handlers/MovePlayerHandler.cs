@@ -19,18 +19,15 @@ namespace Assets.Scripts.Handlers
 
         public override void Handle(DatagramHolder deserializedDatagram, NetworkChannel networkChannel)
         {
-            MovePlayerMessage movement = (MovePlayerMessage)deserializedDatagram.Data;            
+            MovePlayerMessage movement = (MovePlayerMessage)deserializedDatagram.Data;
+            Debug.Log(movement.Rotation);
             Transform playerTransform = PlayerDatabase.GetTransform(networkChannel);
 
             playerTransform.position = movement.Position;
             if (!cameras.ContainsKey(networkChannel))
                 cameras[networkChannel] = playerTransform.Find("Camera").GetComponent<Camera>();
 
-            cameras[networkChannel].transform.rotation = movement.Rotation;
-
-            Vector3 horizontalRotation = cameras[networkChannel].transform.rotation.eulerAngles;
-            horizontalRotation.x = horizontalRotation.z = 0;
-            playerTransform.eulerAngles = horizontalRotation;
+            cameras[networkChannel].transform.rotation = movement.Rotation;            
         }
     }
 }

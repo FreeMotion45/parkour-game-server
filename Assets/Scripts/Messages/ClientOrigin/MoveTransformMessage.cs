@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Scripts.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,10 +17,7 @@ namespace Assets.Scripts.Messages.ClientOrigin
         public float posY;
         public float posZ;
 
-        public float x;
-        public float y;
-        public float z;
-        public float w;
+        public byte[] quaternionBytes;
 
         public MoveTransformMessage(int transformHash, Vector3 position, Quaternion rotation)
         {
@@ -41,14 +39,8 @@ namespace Assets.Scripts.Messages.ClientOrigin
 
         public Quaternion Rotation
         {
-            get => new Quaternion(x, y, z, w);
-            set
-            {
-                x = value.x;
-                y = value.y;
-                z = value.z;
-                w = value.w;
-            }
+            get => GeneralUtils.DeserializeQuaternion(quaternionBytes);
+            set => quaternionBytes = GeneralUtils.SerializeQuaternion(value);
         }
     }
 }

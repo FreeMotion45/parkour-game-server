@@ -42,6 +42,13 @@ namespace Assets.Scripts.Utils
             this.offset = offset + HEADER_BYTES;
         }
 
+        public void Update(byte[] bytes, int offset, int bits)
+        {
+            this.bits = bits;
+            this.offset = offset;
+            this.bytes = bytes;
+        }
+
         public void Update(Stream stream)
         {
             byte[] bitCountBytes = new byte[HEADER_BYTES];
@@ -56,6 +63,23 @@ namespace Assets.Scripts.Utils
             stream.Read(bytes, HEADER_BYTES, bytes.Length);
 
             offset = 0;
+        }    
+        
+        public int ReadNumberBits(int offset, int numberBits)
+        {
+            int result = 0;            
+            for (int i = offset; i < numberBits; i++)
+            {
+                int currentByteIndex = i / BITS_IN_BYTE;
+                byte currentByte = bytes[currentByteIndex + this.offset];
+
+                int currentBitIndex = i % BITS_IN_BYTE;
+                int bit = (currentByte >> currentBitIndex) & 1;
+
+                int shift = (numberBits - offset) - (numberBits - i);
+                result |= (bit << shift);
+            }
+            return result;
         }
 
         public IEnumerator<int> GetEnumerator()

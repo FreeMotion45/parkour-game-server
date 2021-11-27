@@ -45,9 +45,49 @@ namespace Assets.Scripts.Utils
             }
         }
 
+        public void WriteBits(byte[] bytes)
+        {
+            foreach (byte b in bytes)
+            {
+                for (int i = 0; i < BITS_IN_BYTE; i++)
+                {
+                    int bit = (b >> i) & 1;
+                    WriteBit((byte)(bit));
+                }
+            }
+        }
+
+        public void WriteBits(int num, int bits)
+        {
+            for (int i = 0; i < bits; i++)
+            {
+                int bit = (num >> i) & 1;
+                WriteBit((byte)(bit));
+            }
+        }
+
+        public void WriteXBitsOfByte(int b, int x)
+        {
+            for (int i = 0; i < x; i++)
+            {
+                int bit = (b >> i) & 1;
+                WriteBit((byte)(bit));
+            }
+        }
+
         public byte[] GetByteArray()
         {
             return bits.ToArray();
+        }
+
+        public byte[] GetByteArrayAndClear()
+        {
+            if (bitIndexInByte != 0)
+                bits.Add(currentByte);
+
+            byte[] result = bits.ToArray();
+            Clear();
+            return result;
         }
 
         public byte[] GetByteArraySerialized()

@@ -36,7 +36,11 @@ namespace Assets.Scripts.Server
                     netTransforms.Select(nt => nt.transformHash),
                     netTransforms.Select(nt => nt.transform.position),
                     netTransforms.Select(nt => nt.transform.rotation)
-                    );                
+                    );               
+                
+                // Remember to remove from DB and here. This is why
+                // Transforming like this sucks ass.
+                // And why self implementation of this is much better.
                 PlayerDatabase.Publish(playerTransformsMessage, DatagramType.TransformsUpdate);                
             }            
         }

@@ -19,5 +19,6 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams
         MoveTransform,
         TransformsUpdate,
         WorldState,
+        PlayerShoot,
     }
 }

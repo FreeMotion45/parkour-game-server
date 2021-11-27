@@ -13,7 +13,7 @@ namespace Assets.Scripts.Utils
         private readonly static BitReader bitReader = new BitReader();
 
         // 2 + 1 + 9 * 3 = 30. Sadly, we have 2 unutilized bit...
-        private readonly static int BIT_PRECISION = 20;
+        private readonly static int BIT_PRECISION = 9;
         private readonly static int QUATERNION_PRECISION_VALUE = (int)((Math.Pow(2, BIT_PRECISION) / 2) - 1);
 
         public static byte[] SerializeQuaternion(Quaternion q)

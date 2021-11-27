@@ -20,7 +20,11 @@ namespace Assets.Scripts.Utils
             List<float> values = new List<float> { q.x, q.y, q.z, q.w };
 
             // 2 bit value
-            int maxIndex = values.IndexOf(Mathf.Max(values.ToArray()));
+            int maxIndex = 0;
+            for (int i = 1; i < values.Count; i++)
+                maxIndex = Mathf.Abs(values[maxIndex]) > Mathf.Abs(values[i]) ? maxIndex : i;
+
+            int reconstrucedValSignBit = values[maxIndex] >= 0 ? 0 : 1;
             values.RemoveAt(maxIndex);
 
             int[] smallestThree = new int[3];
@@ -35,23 +39,28 @@ namespace Assets.Scripts.Utils
             }
 
             bitWriter.WriteXBitsOfByte(maxIndex, 2);
+            bitWriter.WriteBit(reconstrucedValSignBit);
             bitWriter.WriteBits(smallestThree[0], BIT_PRECISION);
             bitWriter.WriteBits(smallestThree[1], BIT_PRECISION);
             bitWriter.WriteBits(smallestThree[2], BIT_PRECISION);
 
-            // Result bytes sized 2 + 8 * 3 = 26 bytes.
+            // Result bytes sized 2 + 1 + 11 * 3 = 27 bytes.
             return bitWriter.GetByteArrayAndClear();
         }
 
         public static Quaternion DeserializeQuaternion(byte[] b)
         {
-            bitReader.Update(b, 0, 26);
+            bitReader.Update(b, 0, 2 + 1 + 3 * BIT_PRECISION);
             int maxIndex = bitReader.ReadNumberBits(0, 2);
+            int reconstructedSignBit = bitReader.ReadNumberBits(2, 1);
 
-            float val1 = ReadCompressedQuaternionValue(bitReader.ReadNumberBits(2, BIT_PRECISION));
-            float val2 = ReadCompressedQuaternionValue(bitReader.ReadNumberBits(2 + BIT_PRECISION, 2 + BIT_PRECISION * 2));
-            float val3 = ReadCompressedQuaternionValue(bitReader.ReadNumberBits(2 + BIT_PRECISION * 2, 2 + BIT_PRECISION * 3));
+            float val1 = ReadCompressedQuaternionValue(bitReader.ReadNumberBits(3, BIT_PRECISION));
+            float val2 = ReadCompressedQuaternionValue(bitReader.ReadNumberBits(3 + BIT_PRECISION, BIT_PRECISION));
+            float val3 = ReadCompressedQuaternionValue(bitReader.ReadNumberBits(3 + BIT_PRECISION * 2, BIT_PRECISION));
             float reconstructedVal = Mathf.Sqrt(1 - val1 * val1 - val2 * val2 - val3 * val3);
+
+            if (reconstructedSignBit == 1)
+                reconstructedVal *= -1;
 
             // X
             if (maxIndex == 0)
@@ -75,7 +84,7 @@ namespace Assets.Scripts.Utils
 
             if (val > QUATERNION_PRECISION_VALUE - 1)
             {
-                val -= QUATERNION_PRECISION_VALUE;
+                val -= QUATERNION_PRECISION_VALUE - 1;
                 isNeg = true;
             }
 

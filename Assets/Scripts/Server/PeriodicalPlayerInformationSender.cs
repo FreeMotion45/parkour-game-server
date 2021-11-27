@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Messages;
+using Assets.Scripts.Messages.ServerOrigin;
 using Assets.Scripts.ServerLogic;
 using System;
 using System.Collections;
@@ -12,9 +13,9 @@ using UnityMultiplayer.Shared.Networking.Datagrams;
 
 namespace Assets.Scripts.Server
 {
-    class PeriodicalTransformDataSender : MonoBehaviour
+    class PeriodicalPlayerInformationSender : MonoBehaviour
     {
-        public static PeriodicalTransformDataSender Instance;
+        public static PeriodicalPlayerInformationSender Instance;
 
         private readonly List<NetTransform> netTransforms = new List<NetTransform>();
 
@@ -32,16 +33,18 @@ namespace Assets.Scripts.Server
             {
                 yield return new WaitForSeconds(interpolationTime);
 
-                TransformsUpdateMessage playerTransformsMessage = new TransformsUpdateMessage(
-                    netTransforms.Select(nt => nt.transformHash),
-                    netTransforms.Select(nt => nt.transform.position),
-                    netTransforms.Select(nt => nt.transform.rotation)
-                    );               
-                
-                // Remember to remove from DB and here. This is why
-                // Transforming like this sucks ass.
-                // And why self implementation of this is much better.
-                PlayerDatabase.Publish(playerTransformsMessage, DatagramType.TransformsUpdate);                
+                if (PlayerDatabase.players.Count == 0) continue;
+
+                IEnumerable<PlayerInformation> playerInformation = PlayerDatabase.players
+                    .Select(pair =>
+                    {
+                        Transform transform = pair.Value.transform;
+                        Quaternion rotation = pair.Value.transform.Find("Camera").rotation;
+                        return new PlayerInformation(pair.Key.ChannelID, transform.position, rotation);
+                    });
+                PlayersUpdateMessage playersUpdateMessage = new PlayersUpdateMessage(playerInformation);
+
+                PlayerDatabase.Publish(playersUpdateMessage, DatagramType.PlayersUpdate);                
             }            
         }
 

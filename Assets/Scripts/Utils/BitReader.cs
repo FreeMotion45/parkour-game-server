@@ -63,12 +63,12 @@ namespace Assets.Scripts.Utils
             stream.Read(bytes, HEADER_BYTES, bytes.Length);
 
             offset = 0;
-        }    
-        
+        }
+
         public int ReadNumberBits(int offset, int numberBits)
         {
-            int result = 0;            
-            for (int i = offset; i < numberBits; i++)
+            int result = 0;
+            for (int i = offset; i < numberBits + offset; i++)
             {
                 int currentByteIndex = i / BITS_IN_BYTE;
                 byte currentByte = bytes[currentByteIndex + this.offset];

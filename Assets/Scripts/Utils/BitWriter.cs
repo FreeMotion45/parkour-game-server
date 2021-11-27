@@ -23,7 +23,7 @@ namespace Assets.Scripts.Utils
 
         public int BitsWritten => bits.Count * BITS_IN_BYTE + bitIndexInByte;
 
-        public void WriteBit(byte bit)
+        public void WriteBit(int bit)
         {
             if (bit != 0 && bit != 1)
             {

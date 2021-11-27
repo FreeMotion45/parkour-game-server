@@ -46,6 +46,16 @@ namespace Assets.Scripts.ServerLogic
             return players[channel].GetComponent<NetTransform>();
         }
 
+        public static Transform GetTransform(BaseNetworkChannel channel)
+        {
+            return players[channel].transform;
+        }
+
+        public static Transform[] GetAllTransforms()
+        {
+            return players.Values.Select(obj => obj.transform).ToArray();
+        }        
+
         public void OnDisconnect(BaseNetworkChannel disconnectedChannel)
         {
             if (players.ContainsKey(disconnectedChannel))

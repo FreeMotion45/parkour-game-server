@@ -9,11 +9,11 @@ using UnityEngine;
 namespace Assets.Scripts.Messages.ClientOrigin
 {
     [Serializable]
-    class PlayerShoot
+    class PlayerShootMessage
     {
         public byte[] quaternionBytes;
 
-        public PlayerShoot(Quaternion rotation)
+        public PlayerShootMessage(Quaternion rotation)
         {
             Rotation = rotation;
         }

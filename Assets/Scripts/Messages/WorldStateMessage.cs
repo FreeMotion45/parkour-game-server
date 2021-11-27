@@ -4,26 +4,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Assets.Scripts.Messages
 {
     [Serializable]
     struct PlayerInformation
-    {
-        public string name;
-        public int networkID;
-        public int transformHash;
+    {        
+        public int networkID;        
         public SerializableVector3 Position;
-        public SerializableVector3 Rotation;
+        public SerializableQuaternion Rotation;
 
-        public PlayerInformation(string name, int id, int transformHash,
-            SerializableVector3 position, SerializableVector3 rotation) : this()
-        {
-            this.name = name;
-            this.networkID = id;
-            this.transformHash = transformHash;
-            Position = position;
-            Rotation = rotation;
+        public PlayerInformation(int id, Vector3 position, Quaternion rotation) : this()
+        {            
+            networkID = id;            
+            Position = new SerializableVector3(position);
+            Rotation = new SerializableQuaternion(rotation);
         }
     }
 

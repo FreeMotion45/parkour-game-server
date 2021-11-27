@@ -32,7 +32,7 @@ namespace Assets.Scripts.ServerLogic
 
         private void Start()
         {
-            PeriodicalTransformDataSender.Instance.Add(this);
+            PeriodicalPlayerInformationSender.Instance.Add(this);
         }
     }
 }

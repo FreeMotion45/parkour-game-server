@@ -11,7 +11,10 @@ namespace Assets.Scripts.Messages.ClientOrigin
     [Serializable]
     class PlayerShootMessage
     {
-        public byte[] quaternionBytes;
+        public float x;
+        public float y;
+        public float z;
+        public float w;
 
         public PlayerShootMessage(Quaternion rotation)
         {
@@ -20,8 +23,14 @@ namespace Assets.Scripts.Messages.ClientOrigin
 
         public Quaternion Rotation
         {
-            get => GeneralUtils.DeserializeQuaternion(quaternionBytes);
-            set => quaternionBytes = GeneralUtils.SerializeQuaternion(value);
+            get => new Quaternion(x, y, z, w);
+            set
+            {
+                x = value.x;
+                y = value.y;
+                z = value.z;
+                w = value.w;
+            }
         }
     }
 }

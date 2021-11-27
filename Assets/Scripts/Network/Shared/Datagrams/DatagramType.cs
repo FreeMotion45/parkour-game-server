@@ -23,5 +23,7 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams
         PlayerShoot,
         PlayersUpdate,
         LinkNameToID,
+        PlayerHealthChange,
+        PlayerDeath,
     }
 }

@@ -41,11 +41,6 @@ namespace Assets.Scripts.ServerLogic
             return players[channel].transform.eulerAngles;
         }
 
-        public static NetTransform GetNetTransform(BaseNetworkChannel channel)
-        {
-            return players[channel].GetComponent<NetTransform>();
-        }
-
         public static Transform GetTransform(BaseNetworkChannel channel)
         {
             return players[channel].transform;
@@ -54,7 +49,17 @@ namespace Assets.Scripts.ServerLogic
         public static Transform[] GetAllTransforms()
         {
             return players.Values.Select(obj => obj.transform).ToArray();
-        }        
+        }
+        
+        public static GameObject GetPlayerObject(BaseNetworkChannel channel)
+        {
+            return GetTransform(channel).gameObject;
+        }
+        
+        public static T GetComponent<T>(BaseNetworkChannel channel)
+        {
+            return players[channel].GetComponent<T>();
+        }
 
         public void OnDisconnect(BaseNetworkChannel disconnectedChannel)
         {

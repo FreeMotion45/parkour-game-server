@@ -27,10 +27,10 @@ namespace Assets.Scripts.Handlers
             GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
             player.name = request.name;
 
-            LinkCurrentPlayersToIDs(networkChannel);
-            SendCurrentWorldState(networkChannel);
-
             PlayerDatabase.players[networkChannel] = player;
+
+            LinkCurrentPlayersToIDs(networkChannel);
+            SendCurrentWorldState(networkChannel);            
 
             PlayerJoinMessage playerJoinMessage = new PlayerJoinMessage(request.name, networkChannel.ChannelID, spawnPosition);
             PlayerDatabase.Publish(playerJoinMessage, DatagramType.PlayerJoin);
@@ -49,6 +49,7 @@ namespace Assets.Scripts.Handlers
         private void SendCurrentWorldState(BaseNetworkChannel channel)
         {
             IEnumerable<PlayerInformation> playerInformation = PlayerDatabase.players.Keys
+                .Where(network => network != channel)
                 .Select(network =>
                 {
                     Vector3 position = PlayerDatabase.GetPosition(network);

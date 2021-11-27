@@ -94,7 +94,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3060000243722605382
 Transform:
   m_ObjectHideFlags: 0
@@ -187,9 +187,11 @@ GameObject:
   - component: {fileID: 812404713414083406}
   - component: {fileID: -7500591711650660269}
   - component: {fileID: 5453156471329734256}
+  - component: {fileID: -4573644280635771578}
+  - component: {fileID: 8485121003579509951}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -300,3 +302,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCamera: {fileID: 4511198422964665715}
+--- !u!114 &-4573644280635771578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7063793092162795239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3921dfc89b72f6644b998e714da577c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerCamera: {fileID: 4511198422964665715}
+  maxShootingDistance: 100
+  hittableLayers:
+    serializedVersion: 2
+    m_Bits: 1
+--- !u!114 &8485121003579509951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7063793092162795239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71d26fbaf0465d34abdc3dc70b082709, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  health: 100

@@ -19,8 +19,7 @@ namespace Assets.Scripts.Handlers
 
         public override void Handle(DatagramHolder deserializedDatagram, NetworkChannel networkChannel)
         {
-            MovePlayerMessage movement = (MovePlayerMessage)deserializedDatagram.Data;
-            Debug.Log(movement.Rotation);
+            MovePlayerMessage movement = (MovePlayerMessage)deserializedDatagram.Data;            
             Transform playerTransform = PlayerDatabase.GetTransform(networkChannel);
 
             playerTransform.position = movement.Position;

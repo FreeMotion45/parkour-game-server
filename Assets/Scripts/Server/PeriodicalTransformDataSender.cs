@@ -35,7 +35,7 @@ namespace Assets.Scripts.Server
                 TransformsUpdateMessage playerTransformsMessage = new TransformsUpdateMessage(
                     netTransforms.Select(nt => nt.transformHash),
                     netTransforms.Select(nt => nt.transform.position),
-                    netTransforms.Select(nt => nt.transform.eulerAngles)
+                    netTransforms.Select(nt => nt.transform.rotation)
                     );                
                 PlayerDatabase.Publish(playerTransformsMessage, DatagramType.TransformsUpdate);                
             }            

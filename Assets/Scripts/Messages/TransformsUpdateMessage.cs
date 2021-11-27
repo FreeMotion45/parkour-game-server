@@ -16,24 +16,26 @@ namespace Assets.Scripts.Messages
         public float[] posY;
         public float[] posZ;
 
-        public float[] eulerX;
-        public float[] eulerY;
-        public float[] eulerZ;
+        public float[] x;
+        public float[] y;
+        public float[] z;
+        public float[] w;
 
-        public TransformsUpdateMessage(IEnumerable<int> transformHashes, IEnumerable<Vector3> positions, IEnumerable<Vector3> eulers)
+        public TransformsUpdateMessage(IEnumerable<int> transformHashes, IEnumerable<Vector3> positions, IEnumerable<Quaternion> rotations)
         {
             this.transformHashes = transformHashes.ToArray();
 
             posX = new float[this.transformHashes.Length];
-            posY = new float[this.transformHashes.Length];
             posZ = new float[this.transformHashes.Length];
+            posY = new float[this.transformHashes.Length];
 
-            eulerX = new float[this.transformHashes.Length];
-            eulerY = new float[this.transformHashes.Length];
-            eulerZ = new float[this.transformHashes.Length];
+            x = new float[this.transformHashes.Length];
+            y = new float[this.transformHashes.Length];
+            z = new float[this.transformHashes.Length];
+            w = new float[this.transformHashes.Length];
 
             Positions = positions.ToArray();
-            Eulers = eulers.ToArray();
+            Rotations = rotations.ToArray();
         }
 
         public Vector3[] Positions
@@ -51,18 +53,18 @@ namespace Assets.Scripts.Messages
             }
         }
 
-        public Vector3[] Eulers
+        public Quaternion[] Rotations
         {
             get => Enumerable.Range(0, transformHashes.Length)
-                .Select(i => new Vector3(eulerX[i], eulerY[i], eulerZ[i])).ToArray();
+                .Select(i => new Quaternion(x[i], y[i], z[i], w[i])).ToArray();
             set
             {
-
                 for (int i = 0; i < value.Length; i++)
                 {
-                    eulerX[i] = value[i].x;
-                    eulerY[i] = value[i].y;
-                    eulerZ[i] = value[i].z;
+                    x[i] = value[i].x;
+                    y[i] = value[i].y;
+                    z[i] = value[i].z;
+                    w[i] = value[i].w;
                 }
             }
         }

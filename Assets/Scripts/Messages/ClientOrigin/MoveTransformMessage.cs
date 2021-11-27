@@ -16,15 +16,16 @@ namespace Assets.Scripts.Messages.ClientOrigin
         public float posY;
         public float posZ;
 
-        public float eulerX;
-        public float eulerY;
-        public float eulerZ;
+        public float x;
+        public float y;
+        public float z;
+        public float w;
 
-        public MoveTransformMessage(int transformHash, Vector3 position, Vector3 eulerAngles)
+        public MoveTransformMessage(int transformHash, Vector3 position, Quaternion rotation)
         {
             this.transformHash = transformHash;
             Position = position;
-            EulerAngles = eulerAngles;
+            Rotation = rotation;
         }
 
         public Vector3 Position
@@ -38,14 +39,15 @@ namespace Assets.Scripts.Messages.ClientOrigin
             }
         }
 
-        public Vector3 EulerAngles
+        public Quaternion Rotation
         {
-            get => new Vector3(eulerX, eulerY, eulerZ);
+            get => new Quaternion(x, y, z, w);
             set
             {
-                eulerX = value.x;
-                eulerY = value.y;
-                eulerZ = value.z;
+                x = value.x;
+                y = value.y;
+                z = value.z;
+                w = value.w;
             }
         }
     }

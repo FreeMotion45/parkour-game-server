@@ -14,7 +14,7 @@ using UnityMultiplayer.Shared.Networking.Datagrams.Handling;
 
 namespace Assets.Scripts.Handlers
 {
-    class MovePlayerHandler : BaseBehaviourDatagramHandler
+    class MoveTransformHandler : BaseBehaviourDatagramHandler
     {
         public override void Handle(DatagramHolder deserializedDatagram, NetworkChannel networkChannel)
         {
@@ -24,7 +24,7 @@ namespace Assets.Scripts.Handlers
 
             GameObject player = NetTransform.networkObjects[movePlayerMessage.transformHash].gameObject;
             player.transform.position = movePlayerMessage.Position;
-            player.transform.eulerAngles = movePlayerMessage.EulerAngles;
+            player.transform.rotation = movePlayerMessage.Rotation;
         }
     }
 }

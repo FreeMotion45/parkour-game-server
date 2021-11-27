@@ -47,7 +47,7 @@ namespace UnityMultiplayer.Server
         public IReadOnlyList<BaseNetworkChannel> NetworkChannels => _networkChannels;        
 
         public void Start()
-        {                        
+        {            
             _networkChannels = new List<BaseNetworkChannel>();
             _nonHandshakedChannels = new List<BaseNetworkChannel>();
             _hostToChannel = new Dictionary<IPEndPoint, NetworkChannel>();            
@@ -113,13 +113,15 @@ namespace UnityMultiplayer.Server
                     DisconnectChannel(networkChannel);
                     Debug.Log("Client disconnected without disconnect request...");
                     continue;
-                }
+                }                
 
                 foreach (DatagramHolder message in allMessages)
-                {
+                {                    
                     if (message.DatagramType == DatagramType.Disconnect)
                     {
-                        DisconnectChannel(networkChannel);
+                        var remote = networkChannel.RemoteEndPoint;
+                        DisconnectChannel(networkChannel);                        
+                        Debug.Log($"Client {remote.Address}:{remote.Port} disconnected gracefully from the server.");
 
                         // Breaking because after the disconnect we do no want
                         // to process any other messages sent by the client.

@@ -36,6 +36,9 @@ namespace Assets.Scripts.Handlers
             PlayerShootMessage message = (PlayerShootMessage)deserializedDatagram.Data;
             Quaternion playerRotation = message.Rotation;
 
+
+            // Moving the player to a temporary isolated layer,
+            // so he doesn't hit himself when shooting.
             GameObject player = PlayerDatabase.GetPlayerObject(networkChannel);
             int originalLayer = player.layer;
             player.layer = temporaryLayer;
@@ -43,11 +46,11 @@ namespace Assets.Scripts.Handlers
             Gun playerGun = PlayerDatabase.GetComponent<Gun>(networkChannel);            
             GameObject objectHit = playerGun.Shoot(playerRotation, hittableLayers);
 
+            // Moving the from the temporary layer to his original one.
             player.layer = originalLayer;
 
             if (objectHit != null)
-            {
-                if (gameObject == PlayerDatabase.GetPlayerObject(networkChannel)) return;
+            {                
                 HandleObjectHit(networkChannel, objectHit);
             }
             else
@@ -56,11 +59,11 @@ namespace Assets.Scripts.Handlers
             }
         }
 
-        private void HandleObjectHit(NetworkChannel channel, GameObject gameObject)
+        private void HandleObjectHit(NetworkChannel channel, GameObject objectHit)
         {
-            if (!gameObject.CompareTag("Player")) return;
+            if (!objectHit.CompareTag("Player")) return;
 
-            PlayerGameInformation info = gameObject.GetComponent<PlayerGameInformation>();
+            PlayerGameInformation info = objectHit.GetComponent<PlayerGameInformation>();
 
             if (info.IsDead())
             {
@@ -78,13 +81,14 @@ namespace Assets.Scripts.Handlers
             {
                 data = new PlayerDeathMessage(channel.ChannelID);                
                 type = DatagramType.PlayerDeath;
-                Debug.Log($"{PlayerDatabase.GetName(channel)} killed {gameObject.name}");
+                Debug.Log($"{PlayerDatabase.GetName(channel)} killed {objectHit.name}");
             }
             else
             {
-                data = new PlayerHealthChangeMessage(channel.ChannelID, currentHealth);
+                int idOfHitPlayer = PlayerDatabase.GetChannel(objectHit).ChannelID;
+                data = new PlayerHealthChangeMessage(idOfHitPlayer, currentHealth);
                 type = DatagramType.PlayerHealthChange;
-                Debug.Log($"{PlayerDatabase.GetName(channel)} reduce {gameObject.name}'s health to {info.health}");
+                Debug.Log($"{PlayerDatabase.GetName(channel)} reduced {objectHit.name}'s health to {info.health}");
             }
 
             PlayerDatabase.Publish(data, type);

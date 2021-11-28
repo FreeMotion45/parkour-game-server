@@ -37,6 +37,17 @@ namespace Assets.Scripts.ServerLogic
             }
         }
 
+        public static BaseNetworkChannel GetChannel(GameObject player)
+        {
+            foreach (KeyValuePair<BaseNetworkChannel, GameObject> someone in players)
+            {
+                if (someone.Value == player)
+                    return someone.Key;
+            }
+
+            return null;
+        }
+
         public static string GetName(BaseNetworkChannel channel)
         {
             return players[channel].name;

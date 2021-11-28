@@ -1,4 +1,6 @@
 ﻿using Assets.Scripts.Game.Shared;
+using Assets.Scripts.Network.Messages.ServerOrigin;
+using Assets.Scripts.Shared;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityMultiplayer.Shared.Networking.Datagrams;
 
 namespace Assets.Scripts.ServerLogic
 {
@@ -16,16 +19,24 @@ namespace Assets.Scripts.ServerLogic
 
         private int currentSpawnIndex;
 
-        public void RespawnPlayer(GameObject player)
+        public void RespawnPlayer(BaseNetworkChannel channel)
         {
-            StartCoroutine(RespawnPlayerAfterTime(player));
+            StartCoroutine(RespawnPlayerAfterTime(channel));
         }
 
-        private IEnumerator RespawnPlayerAfterTime(GameObject player)
+        private IEnumerator RespawnPlayerAfterTime(BaseNetworkChannel player)
         {
             yield return new WaitForSeconds(respawnTime);
-            var state = player.GetComponent<PlayerGameState>();
+
+            Vector3 spawnPosition = GetRespawnPosition();
+            var state = PlayerDatabase.GetComponent<PlayerGameState>(player);
             state.RevivePlayer(state.maxHealth);
+
+            // Not doing the line below because the client is position authorative.
+            // player.transform.position = spawnPosition;
+
+            PlayerSpawnMessage spawnMessage = new PlayerSpawnMessage(player.ChannelID, spawnPosition);
+            PlayerDatabase.Publish(spawnMessage, DatagramType.PlayerSpawn);
         }
 
         public Vector3 GetRespawnPosition()
@@ -34,6 +45,6 @@ namespace Assets.Scripts.ServerLogic
             currentSpawnIndex++;
 
             return spawnPositions[spawnIndex].position;
-        }
+        }        
     }
 }

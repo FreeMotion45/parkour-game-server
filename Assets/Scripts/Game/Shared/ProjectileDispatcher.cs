@@ -13,8 +13,8 @@ namespace Assets.Scripts.Game.Shared
             float maxDistance, out RaycastHit info)
         {                        
             Vector3 furthestDestination = rayOrigin + playerRotation * Vector3.forward * maxDistance;
-
-            bool hitAnything = Physics.Raycast(rayOrigin, furthestDestination,
+            Vector3 direction = (furthestDestination - rayOrigin).normalized;
+            bool hitAnything = Physics.Raycast(rayOrigin, direction,
                 out info, maxDistance, hittableLayers);
             return hitAnything;
         }

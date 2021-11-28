@@ -21,7 +21,7 @@ namespace Assets.Scripts.Handlers
     {
         private readonly string PLAYER_SHOOT_IGNORE_LAYER = "Player Shoot Ignore";
 
-
+        public PlayerRespawner playerRespawner;
 
         private LayerMask temporaryLayer;
 
@@ -68,7 +68,8 @@ namespace Assets.Scripts.Handlers
             if (!objectHit.CompareTag("Player")) return;
 
             PlayerGameState info = objectHit.GetComponent<PlayerGameState>();
-            int idOfHitPlayer = PlayerDatabase.GetChannel(objectHit).ChannelID;
+            BaseNetworkChannel hitChannel = PlayerDatabase.GetChannel(objectHit);
+            int idOfHitPlayer = hitChannel.ChannelID;
 
             if (info.IsDead())
             {
@@ -87,6 +88,7 @@ namespace Assets.Scripts.Handlers
                 data = new PlayerDeathMessage(idOfHitPlayer);                
                 type = DatagramType.PlayerDeath;
                 Debug.Log($"{PlayerDatabase.GetName(channel)} killed {objectHit.name}");
+                playerRespawner.RespawnPlayer(hitChannel);
             }
             else
             {                

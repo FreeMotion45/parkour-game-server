@@ -17,13 +17,14 @@ namespace Assets.Scripts.Handlers
 {
     class RequestJoinHandler : BaseBehaviourDatagramHandler
     {
-        [SerializeField] private GameObject playerPrefab;
-        [SerializeField] private Vector3 spawnPosition;
+        [SerializeField] private GameObject playerPrefab;        
+        public PlayerRespawner respawner;
 
         public override void Handle(DatagramHolder deserializedDatagram, NetworkChannel networkChannel)
         {
             RequestJoinMessage request = (RequestJoinMessage)deserializedDatagram.Data;
 
+            Vector3 spawnPosition = respawner.GetRespawnPosition();
             GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
             player.name = request.name;
 

@@ -188,7 +188,7 @@ GameObject:
   - component: {fileID: -7500591711650660269}
   - component: {fileID: 5453156471329734256}
   - component: {fileID: -4573644280635771578}
-  - component: {fileID: 8485121003579509951}
+  - component: {fileID: 8299955459785458138}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -316,10 +316,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerCamera: {fileID: 4511198422964665715}
   maxShootingDistance: 100
-  hittableLayers:
-    serializedVersion: 2
-    m_Bits: 1
---- !u!114 &8485121003579509951
+--- !u!114 &8299955459785458138
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -328,7 +325,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 7063793092162795239}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 71d26fbaf0465d34abdc3dc70b082709, type: 3}
+  m_Script: {fileID: 11500000, guid: 0599f1479227410409d305661cd92de2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxHealth: 100
   health: 100

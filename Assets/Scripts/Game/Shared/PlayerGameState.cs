@@ -7,8 +7,9 @@ using UnityEngine;
 
 namespace Assets.Scripts.Game.Shared
 {
-    class PlayerGameInformation : MonoBehaviour
+    class PlayerGameState : MonoBehaviour
     {
+        public int maxHealth = 100;
         public int health = 100;
 
         public int Damage(int points)
@@ -20,6 +21,11 @@ namespace Assets.Scripts.Game.Shared
         public bool IsDead()
         {
             return health == 0;
+        }
+
+        public void RevivePlayer(int revivedHealth)
+        {
+            health = revivedHealth;
         }
     }
 }

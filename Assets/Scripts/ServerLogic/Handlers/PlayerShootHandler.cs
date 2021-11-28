@@ -3,7 +3,9 @@ using Assets.Scripts.Messages.ClientOrigin;
 using Assets.Scripts.Network.Messages.ServerOrigin;
 using Assets.Scripts.ServerLogic;
 using Assets.Scripts.ServerLogic.Player;
+using Assets.Scripts.Shared;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,6 +20,8 @@ namespace Assets.Scripts.Handlers
     class PlayerShootHandler : BaseBehaviourDatagramHandler
     {
         private readonly string PLAYER_SHOOT_IGNORE_LAYER = "Player Shoot Ignore";
+
+
 
         private LayerMask temporaryLayer;
 
@@ -63,7 +67,8 @@ namespace Assets.Scripts.Handlers
         {
             if (!objectHit.CompareTag("Player")) return;
 
-            PlayerGameInformation info = objectHit.GetComponent<PlayerGameInformation>();
+            PlayerGameState info = objectHit.GetComponent<PlayerGameState>();
+            int idOfHitPlayer = PlayerDatabase.GetChannel(objectHit).ChannelID;
 
             if (info.IsDead())
             {
@@ -72,20 +77,19 @@ namespace Assets.Scripts.Handlers
             }
 
             // TODO: Decouple this somehow.
-            int currentHealth = info.Damage(15);
+            int currentHealth = info.Damage(8);
 
             object data;
             DatagramType type;
 
             if (info.IsDead())
             {
-                data = new PlayerDeathMessage(channel.ChannelID);                
+                data = new PlayerDeathMessage(idOfHitPlayer);                
                 type = DatagramType.PlayerDeath;
                 Debug.Log($"{PlayerDatabase.GetName(channel)} killed {objectHit.name}");
             }
             else
-            {
-                int idOfHitPlayer = PlayerDatabase.GetChannel(objectHit).ChannelID;
+            {                
                 data = new PlayerHealthChangeMessage(idOfHitPlayer, currentHealth);
                 type = DatagramType.PlayerHealthChange;
                 Debug.Log($"{PlayerDatabase.GetName(channel)} reduced {objectHit.name}'s health to {info.health}");

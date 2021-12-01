@@ -9,10 +9,10 @@ namespace Assets.Scripts.Messages.ServerOrigin
     [Serializable]
     class LinkPlayerNameToIDMessage
     {
-        public string name;
         public int id;
+        public string name;
 
-        public LinkPlayerNameToIDMessage(string name, int id)
+        public LinkPlayerNameToIDMessage(int id, string name)
         {
             this.name = name;
             this.id = id;

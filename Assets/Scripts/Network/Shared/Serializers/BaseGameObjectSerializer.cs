@@ -12,5 +12,6 @@ namespace UnityMultiplayer.Shared.Networking.Serializers
     {
         public abstract byte[] Serialize(DatagramHolder datagramHolder);
         public abstract DatagramHolder Deserialize(byte[] bytes);
+        public virtual void Initialize() { }
     }
 }

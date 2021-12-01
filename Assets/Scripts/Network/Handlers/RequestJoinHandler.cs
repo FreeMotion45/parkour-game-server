@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityMultiplayer.Shared.Networking;
@@ -31,9 +32,13 @@ namespace Assets.Scripts.Handlers
             PlayerDatabase.players[networkChannel] = player;
 
             LinkCurrentPlayersToIDs(networkChannel);
-            SendCurrentWorldState(networkChannel);            
+            Thread.Sleep(100);
+            SendCurrentWorldState(networkChannel);
+            Thread.Sleep(100);
 
-            PlayerJoinMessage playerJoinMessage = new PlayerJoinMessage(request.name, networkChannel.ChannelID, spawnPosition);
+            Debug.Log("Spawning player at: " + spawnPosition);
+
+            PlayerJoinMessage playerJoinMessage = new PlayerJoinMessage(networkChannel.ChannelID, request.name, spawnPosition);
             PlayerDatabase.Publish(playerJoinMessage, DatagramType.PlayerJoin);
         }
 
@@ -42,7 +47,7 @@ namespace Assets.Scripts.Handlers
             foreach (BaseNetworkChannel connectedChannel in PlayerDatabase.players.Keys)
             {
                 string name = PlayerDatabase.GetName(connectedChannel);
-                LinkPlayerNameToIDMessage link = new LinkPlayerNameToIDMessage(name, connectedChannel.ChannelID);
+                LinkPlayerNameToIDMessage link = new LinkPlayerNameToIDMessage(connectedChannel.ChannelID, name);
                 channel.Send(link, DatagramType.LinkNameToID);
             }
         }

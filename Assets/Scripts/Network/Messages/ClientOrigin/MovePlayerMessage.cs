@@ -15,7 +15,10 @@ namespace Assets.Scripts.Messages.ClientOrigin
         public float posY;
         public float posZ;
 
-        public byte[] quaternionBytes;
+        public float rotX;
+        public float rotY;
+        public float rotZ;
+        public float rotW;
 
         public MovePlayerMessage(Vector3 position, Quaternion rotation)
         {
@@ -36,8 +39,14 @@ namespace Assets.Scripts.Messages.ClientOrigin
 
         public Quaternion Rotation
         {
-            get => GeneralUtils.DeserializeQuaternion(quaternionBytes);
-            set => quaternionBytes = GeneralUtils.SerializeQuaternion(value);
+            get => new Quaternion(rotX, rotY, rotZ, rotW);
+            set
+            {
+                rotX = value.x;
+                rotY = value.y;
+                rotZ = value.z;
+                rotW = value.w;
+            }
         }
     }
 }

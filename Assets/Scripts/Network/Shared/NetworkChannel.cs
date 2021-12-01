@@ -83,18 +83,13 @@ namespace UnityMultiplayer.Shared.Networking
         }
 
         public override void Send(DatagramHolder data, TransportType transportType = TransportType.Reliable)
-        {            
-            try
-            {
-                if (transportType == TransportType.Reliable)
-                    ReliableChannel.AsyncSendDatagramHolder(data);
-                else
-                    UnreliableChannel.SendDatagramHolder(data);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("fuck");
-            }
+        {
+            if (ReliableChannel == null) return;
+
+            if (transportType == TransportType.Reliable)
+                ReliableChannel.AsyncSendDatagramHolder(data);
+            else
+                UnreliableChannel.SendDatagramHolder(data);
         }
     }
 }

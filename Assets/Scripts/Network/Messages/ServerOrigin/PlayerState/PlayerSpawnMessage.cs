@@ -12,12 +12,26 @@ namespace Assets.Scripts.Network.Messages.ServerOrigin
     class PlayerSpawnMessage
     {
         public int clientId;
-        public SerializableVector3 position;
+
+        private float x;
+        private float y;
+        private float z;
 
         public PlayerSpawnMessage(int clientId, Vector3 position)
         {
             this.clientId = clientId;
-            this.position = new SerializableVector3(position);
+            Position = position;
+        }
+
+        public Vector3 Position
+        {
+            get => new Vector3(x, y, z);
+            set
+            {
+                x = value.x;
+                y = value.y;
+                z = value.z;
+            }
         }
     }
 }

@@ -76,7 +76,7 @@ namespace UnityMultiplayer.Shared.Networking
             IsConnected = true;
             _lastKeepAliveReceived = DateTime.Now;
             _lastKeepAliveSent = DateTime.Now;
-            SendDatagramHolder(new DatagramHolder(DatagramType.UnreliableKeepAlive, null));
+            // SendDatagramHolder(new DatagramHolder(DatagramType.UnreliableKeepAlive, null));
         }
 
         public void Disconnect()
@@ -217,8 +217,8 @@ namespace UnityMultiplayer.Shared.Networking
         private void SendKeepAlive()
         {
             // Bypassing the keep alive message queue
-            byte[] bytes = _serializer.Serialize(new DatagramHolder(DatagramType.UnreliableKeepAlive, null));
-            GeneralSend(bytes);
+            // byte[] bytes = _serializer.Serialize(new DatagramHolder(DatagramType.UnreliableKeepAlive, null));
+            // GeneralSend(bytes);
         }
 
         private double MillisecondsSinceLastReceivedKeepAlive()

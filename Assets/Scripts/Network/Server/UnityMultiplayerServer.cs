@@ -25,8 +25,10 @@ namespace UnityMultiplayer.Server
 
     class UnityMultiplayerServer : MonoBehaviour
     {
-        [SerializeField] private string _hostIP;
-        [SerializeField] private int _hostPort;
+        public string _hostIP;
+        public int _hostPort;
+        public bool startOnEnable;
+
         [Space]
         [SerializeField] private DatagramHandlerResolver _datagramHandlerResolver;        
         [Space]
@@ -43,21 +45,33 @@ namespace UnityMultiplayer.Server
         private UnreliableNetworkListener _unreliableNetworkListener;        
 
         private int clientId;
+        private bool started;
 
-        public IReadOnlyList<BaseNetworkChannel> NetworkChannels => _networkChannels;        
+        public IReadOnlyList<BaseNetworkChannel> NetworkChannels => _networkChannels;
 
-        public void Start()
-        {            
+        public void OnEnable()
+        {
+            if (startOnEnable)
+                StartServer();
+        }
+
+        public void StartServer()
+        {
+            if (started) return;
+            started = true;
+
+            _serializer.Initialize();
+
             _networkChannels = new List<BaseNetworkChannel>();
             _nonHandshakedChannels = new List<BaseNetworkChannel>();
-            _hostToChannel = new Dictionary<IPEndPoint, NetworkChannel>();            
+            _hostToChannel = new Dictionary<IPEndPoint, NetworkChannel>();
             _localEndPoint = new IPEndPoint(IPAddress.Parse(_hostIP), _hostPort);
 
             _reliableNetworkListener = new ReliableNetworkListener(_localEndPoint, new ReliableNetworkMessager(), _serializer);
-            _unreliableNetworkListener = new UnreliableNetworkListener(_localEndPoint, _hostToChannel, _serializer);            
+            _unreliableNetworkListener = new UnreliableNetworkListener(_localEndPoint, _hostToChannel, _serializer);
 
             _reliableNetworkListener.Start();
-        }        
+        }
 
         public void OnDisable()
         {
@@ -140,11 +154,11 @@ namespace UnityMultiplayer.Server
                 foreach (DatagramHolder handshake in nonHandshakedClient.GetAllReliableAndUnreliableMessages())
                 {
                     var remote = nonHandshakedClient.RemoteEndPoint;
-                    if (handshake.DatagramType == DatagramType.Handshake)
+                    if (handshake.DatagramType == DatagramType.ClientHandshakeRequest)
                     {
                         nonHandshakedClient.ReliableChannel.ServerConfirmHandshake(nonHandshakedClient.ChannelID);
                         _nonHandshakedChannels.Remove(nonHandshakedClient);
-                        _networkChannels.Add(nonHandshakedClient);
+                        _networkChannels.Add(nonHandshakedClient);  
                         Debug.Log($"Successfully performed hand shake with: {remote.Address}:{remote.Port}");
                     }
                     else

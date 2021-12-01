@@ -33,7 +33,9 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
         {
             Client = new TcpClient();
             _messager = messageReader;
-            _serializer = serializer;            
+            _serializer = serializer;
+            _remoteEndPoint = remoteEndPoint;
+            ChannelID = -1;
         }
 
         public ReliableNetworkClient(TcpClient client,
@@ -43,6 +45,7 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
             Client = client;
             _messager = messager;
             _serializer = serializer;
+            ChannelID = -1;
             _remoteEndPoint = (IPEndPoint)client.Client.RemoteEndPoint;
         }
 
@@ -53,6 +56,7 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
         public IPEndPoint LocalEndPoint => (IPEndPoint)Client.Client.LocalEndPoint;
         public bool IsConnected => Client.Connected;
         public bool PerformedHandshake { get; private set; }
+        public int ChannelID { get; private set; }
 
         public void Connect()
         {
@@ -121,18 +125,19 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
 
         private void ClientConfirmHandshake()
         {
-            SendDatagramHolder(new DatagramHolder(DatagramType.Handshake, null));
+            SendDatagramHolder(new DatagramHolder(DatagramType.ClientHandshakeRequest, null));
             DatagramHolder handshakeConfirm = ReadOneMessage();
 
-            if (handshakeConfirm.DatagramType != DatagramType.Handshake)
+            if (handshakeConfirm.DatagramType != DatagramType.ServerHandshakeResponse)
                 throw new Exception("Handshake failed with server. Make sure the server is set up correctly.");
 
             PerformedHandshake = true;
+            ChannelID = (int)handshakeConfirm.Data;
         }
 
         public void ServerConfirmHandshake(int id)
-        {            
-            AsyncSendDatagramHolder(new DatagramHolder(DatagramType.Handshake, id));
+        {
+            AsyncSendDatagramHolder(new DatagramHolder(DatagramType.ServerHandshakeResponse, id));
             PerformedHandshake = true;
         }
 
@@ -140,7 +145,8 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
         {
             if (!PerformedHandshake)
             {
-                if (datagram.DatagramType != DatagramType.Handshake)
+                HashSet<DatagramType> handshakeTypes = new HashSet<DatagramType>() { DatagramType.ClientHandshakeRequest, DatagramType.ServerHandshakeResponse };
+                if (!handshakeTypes.Contains(datagram.DatagramType))
                     throw new Exception("Can't send messages over the reliable network connection before a successfull handshake.");
             }
         }
@@ -163,7 +169,7 @@ namespace UnityMultiplayer.Shared.Networking.SecureConnection
                 {
                     // This means that we can't send a message because the client is closed.
                     // Its also OK.
-                    RemoteOpen = false;                    
+                    RemoteOpen = false;
                     break;
                 }
             }

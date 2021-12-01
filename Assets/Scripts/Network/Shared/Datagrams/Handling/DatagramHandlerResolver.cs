@@ -25,7 +25,10 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams.Handling
         {
             HashSet<DatagramType> forbiddenByDefault = new HashSet<DatagramType>
             {
-                DatagramType.Handshake, DatagramType.Disconnect, DatagramType.UnreliableKeepAlive,
+                DatagramType.ClientHandshakeRequest,
+                DatagramType.ServerHandshakeResponse,
+                DatagramType.Disconnect,
+                DatagramType.UnreliableKeepAlive,
             };
 
             foreach (DatagramHandler handler in handlers)

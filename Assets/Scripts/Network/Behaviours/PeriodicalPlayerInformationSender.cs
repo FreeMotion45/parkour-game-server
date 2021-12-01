@@ -44,7 +44,7 @@ namespace Assets.Scripts.Server
                     });
                 PlayersUpdateMessage playersUpdateMessage = new PlayersUpdateMessage(playerInformation);
 
-                PlayerDatabase.Publish(playersUpdateMessage, DatagramType.PlayersUpdate);                
+                PlayerDatabase.Publish(playersUpdateMessage, DatagramType.PlayersUpdate, transport: Shared.TransportType.Unreliable);                
             }            
         }
 

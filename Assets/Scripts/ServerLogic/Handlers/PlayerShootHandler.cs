@@ -22,6 +22,7 @@ namespace Assets.Scripts.Handlers
         private readonly string PLAYER_SHOOT_IGNORE_LAYER = "Player Shoot Ignore";
 
         public PlayerRespawner playerRespawner;
+        public int defaultGunDamage = 20;
 
         private LayerMask temporaryLayer;
 
@@ -78,7 +79,7 @@ namespace Assets.Scripts.Handlers
             }
 
             // TODO: Decouple this somehow.
-            int currentHealth = info.Damage(8);
+            int currentHealth = info.Damage(defaultGunDamage);
 
             object data;
             DatagramType type;

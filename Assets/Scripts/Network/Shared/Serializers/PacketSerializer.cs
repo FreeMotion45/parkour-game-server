@@ -2,6 +2,7 @@
 using Assets.Scripts.Messages.ClientOrigin;
 using Assets.Scripts.Messages.ServerOrigin;
 using Assets.Scripts.Network.Messages.ServerOrigin;
+using Assets.Scripts.Network.Messages.ServerOrigin.PlayerState;
 using Assets.Scripts.Utils;
 using System;
 using System.Collections.Generic;
@@ -42,6 +43,8 @@ namespace Assets.Scripts.Network.Shared.Serializers
                 { DatagramType.PlayerHealthChange, WritePlayerHealthChange },
                 { DatagramType.PlayerDeath, WritePlayerDeath },
                 { DatagramType.PlayerSpawn, WritePlayerSpawn },
+                { DatagramType.PlayerHit, WritePlayerHit },
+                { DatagramType.PlayerKill, WritePlayerKill }
             };
 
             deserializers = new Dictionary<DatagramType, Func<BinaryReader, object>>()
@@ -55,7 +58,9 @@ namespace Assets.Scripts.Network.Shared.Serializers
                 { DatagramType.LinkNameToID, ReadLinkPlayerNameToIDMessage },
                 { DatagramType.PlayerHealthChange, ReadPlayerHealthChange },
                 { DatagramType.PlayerDeath, ReadPlayerDeath },
-                { DatagramType.PlayerSpawn, ReadPlayerSpawn }
+                { DatagramType.PlayerSpawn, ReadPlayerSpawn },
+                { DatagramType.PlayerHit, ReadPlayerHit },
+                { DatagramType.PlayerKill, ReadPlayerKill }
             };
 
             //TestSerializer();
@@ -272,6 +277,31 @@ namespace Assets.Scripts.Network.Shared.Serializers
         public object ReadPlayerSpawn(BinaryReader reader)
         {
             return new PlayerSpawnMessage(ReadClientID(reader), ReadVector3(reader));
+        }
+
+        public void WritePlayerHit(DatagramHolder dgram, BinaryWriter writer)
+        {
+            PlayerHitMessage msg = (PlayerHitMessage)dgram.Data;
+            WriteClientID(msg.clientHitId, writer);
+            WriteClientID(msg.attackerId, writer);
+            writer.Write(msg.currentHealth);
+        }
+
+        public object ReadPlayerHit(BinaryReader reader)
+        {
+            return new PlayerHitMessage(ReadClientID(reader), ReadClientID(reader), reader.ReadInt32());
+        }
+
+        public void WritePlayerKill(DatagramHolder dgram, BinaryWriter writer)
+        {
+            PlayerKillMessage msg = (PlayerKillMessage)dgram.Data;
+            WriteClientID(msg.deadClientId, writer);
+            WriteClientID(msg.killerId, writer);
+        }
+
+        public object ReadPlayerKill(BinaryReader reader)
+        {
+            return new PlayerKillMessage(ReadClientID(reader), ReadClientID(reader));
         }
 
         private void WriteVector3(Vector3 vec, BinaryWriter writer)

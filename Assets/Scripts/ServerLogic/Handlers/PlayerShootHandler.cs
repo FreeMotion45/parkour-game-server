@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Game.Shared;
 using Assets.Scripts.Messages.ClientOrigin;
 using Assets.Scripts.Network.Messages.ServerOrigin;
+using Assets.Scripts.Network.Messages.ServerOrigin.PlayerState;
 using Assets.Scripts.ServerLogic;
 using Assets.Scripts.ServerLogic.Player;
 using Assets.Scripts.Shared;
@@ -64,7 +65,7 @@ namespace Assets.Scripts.Handlers
             }
         }
 
-        private void HandleObjectHit(NetworkChannel channel, GameObject objectHit)
+        private void HandleObjectHit(NetworkChannel shooterChannel, GameObject objectHit)
         {
             if (!objectHit.CompareTag("Player")) return;
 
@@ -74,28 +75,28 @@ namespace Assets.Scripts.Handlers
 
             if (info.IsDead())
             {
-                Debug.Log($"{PlayerDatabase.GetName(channel)} shot and hit a dead player");
+                Debug.Log($"{PlayerDatabase.GetName(shooterChannel)} shot and hit a dead player");
                 return;
             }
 
             // TODO: Decouple this somehow.
-            int currentHealth = info.Damage(defaultGunDamage);
+            int hitPlayerHealth = info.Damage(defaultGunDamage);
 
             object data;
             DatagramType type;
 
             if (info.IsDead())
             {
-                data = new PlayerDeathMessage(idOfHitPlayer);                
-                type = DatagramType.PlayerDeath;
-                Debug.Log($"{PlayerDatabase.GetName(channel)} killed {objectHit.name}");
+                data = new PlayerKillMessage(idOfHitPlayer, shooterChannel.ChannelID);                
+                type = DatagramType.PlayerKill;
+                Debug.Log($"{PlayerDatabase.GetName(shooterChannel)} killed {objectHit.name}");
                 playerRespawner.RespawnPlayer(hitChannel);
             }
             else
             {                
-                data = new PlayerHealthChangeMessage(idOfHitPlayer, currentHealth);
-                type = DatagramType.PlayerHealthChange;
-                Debug.Log($"{PlayerDatabase.GetName(channel)} reduced {objectHit.name}'s health to {info.health}");
+                data = new PlayerHitMessage(idOfHitPlayer, shooterChannel.ChannelID, hitPlayerHealth);
+                type = DatagramType.PlayerHit;
+                Debug.Log($"{PlayerDatabase.GetName(shooterChannel)} reduced {objectHit.name}'s health to {info.health}");
             }
 
             PlayerDatabase.Publish(data, type);

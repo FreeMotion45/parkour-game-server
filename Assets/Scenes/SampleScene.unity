@@ -13084,7 +13084,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerRespawner: {fileID: 1032136801}
-  defaultGunDamage: 20
+  defaultGunDamage: 19
   hittableLayers:
     serializedVersion: 2
     m_Bits: 1

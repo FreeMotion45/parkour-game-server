@@ -10,7 +10,7 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams
     {
         // For default handlers.
         ClientHandshakeRequest,
-        ServerHandshakeResponse,        
+        ServerHandshakeResponse,
         Disconnect,
         UnreliableKeepAlive,
 
@@ -27,5 +27,7 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams
         PlayerHealthChange,
         PlayerDeath,
         PlayerSpawn,
+        PlayerHit,
+        PlayerKill,
     }
 }

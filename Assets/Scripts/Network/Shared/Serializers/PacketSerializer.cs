@@ -3,6 +3,7 @@ using Assets.Scripts.Messages.ClientOrigin;
 using Assets.Scripts.Messages.ServerOrigin;
 using Assets.Scripts.Network.Messages.ServerOrigin;
 using Assets.Scripts.Network.Messages.ServerOrigin.PlayerState;
+using Assets.Scripts.Network.Messages.ServerOrigin.Weapon;
 using Assets.Scripts.Utils;
 using System;
 using System.Collections.Generic;
@@ -44,7 +45,9 @@ namespace Assets.Scripts.Network.Shared.Serializers
                 { DatagramType.PlayerDeath, WritePlayerDeath },
                 { DatagramType.PlayerSpawn, WritePlayerSpawn },
                 { DatagramType.PlayerHit, WritePlayerHit },
-                { DatagramType.PlayerKill, WritePlayerKill }
+                { DatagramType.PlayerKill, WritePlayerKill },
+                { DatagramType.ClientReloadRequest, WriteClientReloadRequest },
+                { DatagramType.ServerReloadResponse, WriteServerReloadResponse }
             };
 
             deserializers = new Dictionary<DatagramType, Func<BinaryReader, object>>()
@@ -60,7 +63,9 @@ namespace Assets.Scripts.Network.Shared.Serializers
                 { DatagramType.PlayerDeath, ReadPlayerDeath },
                 { DatagramType.PlayerSpawn, ReadPlayerSpawn },
                 { DatagramType.PlayerHit, ReadPlayerHit },
-                { DatagramType.PlayerKill, ReadPlayerKill }
+                { DatagramType.PlayerKill, ReadPlayerKill },
+                { DatagramType.ClientReloadRequest, ReadClientReloadRequest },
+                { DatagramType.ServerReloadResponse, ReadServerReloadResponse }
             };
 
             //TestSerializer();
@@ -302,6 +307,27 @@ namespace Assets.Scripts.Network.Shared.Serializers
         public object ReadPlayerKill(BinaryReader reader)
         {
             return new PlayerKillMessage(ReadClientID(reader), ReadClientID(reader));
+        }
+
+        public void WriteClientReloadRequest(DatagramHolder dgram, BinaryWriter writer)
+        {
+            // dgram is null.            
+        }
+
+        public object ReadClientReloadRequest(BinaryReader reader)
+        {
+            return null;
+        }
+
+        public void WriteServerReloadResponse(DatagramHolder dgram, BinaryWriter writer)
+        {
+            ServerReloadResponseMessage msg = (ServerReloadResponseMessage)dgram.Data;
+            writer.Write(msg.reloadSuccessful);
+        }
+
+        public object ReadServerReloadResponse(BinaryReader reader)
+        {
+            return new ServerReloadResponseMessage(reader.ReadBoolean());
         }
 
         private void WriteVector3(Vector3 vec, BinaryWriter writer)

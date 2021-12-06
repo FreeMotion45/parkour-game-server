@@ -29,5 +29,9 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams
         PlayerSpawn,
         PlayerHit,
         PlayerKill,
+
+        // Weapons
+        ClientReloadRequest,
+        ServerReloadResponse,
     }
 }

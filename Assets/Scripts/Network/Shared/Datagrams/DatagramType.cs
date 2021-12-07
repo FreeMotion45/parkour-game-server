@@ -33,5 +33,9 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams
         // Weapons
         ClientReloadRequest,
         ServerReloadResponse,
+
+        // Pick ups
+        PickUpSpawned,
+        PickUpTaken,
     }
 }

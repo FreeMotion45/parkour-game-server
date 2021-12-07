@@ -47,6 +47,11 @@ namespace Assets.Scripts.ServerLogic
 
             return null;
         }
+        
+        public static int GetChannelID(GameObject player)
+        {
+            return GetChannel(player).ChannelID;
+        }
 
         public static string GetName(BaseNetworkChannel channel)
         {

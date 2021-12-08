@@ -26,7 +26,7 @@ namespace Assets.Scripts.ServerLogic.Player
             projectileDispatcher = new ProjectileDispatcher();
 
             // This is hardcoded in Gun.cs in the client-side.
-            gunLogic = new GunLogic(0.2f, 999, 8, 8);
+            gunLogic = new GunLogic(0.2f, 2, 8, 8);
         }
 
         public GameObject Shoot(Quaternion playerRotation, LayerMask mask)

@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Network.Messages.ServerOrigin.PickUp;
+using Assets.Scripts.Network.Messages.ServerOrigin.PickUp.PickUpData;
 using Assets.Scripts.ServerLogic;
 using Assets.Scripts.ServerLogic.Player;
 using System;
@@ -17,9 +18,10 @@ class AmmoMagazinePickUp : BasePickUp
     {
         player.GetComponent<Gun>().gunLogic.MagazinesAvailable += magazinesToRecover;
 
-        PickUpPickedUpMessage message = new PickUpPickedUpMessage(PlayerDatabase.GetChannelID(player), PickUpID);
-        PlayerDatabase.Publish(message, DatagramType.PickUpTaken);
+        AmmoMagazinePickUpData data = new AmmoMagazinePickUpData(magazinesToRecover);
+        PickUpPickedUpMessage message = new PickUpPickedUpMessage(PlayerDatabase.GetChannelID(player), PickUpID, data);
+        PlayerDatabase.Publish(message, DatagramType.PickUpPickedUp);
 
         Destroy(gameObject);
-    }    
+    }
 }

@@ -110,5 +110,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 308e331d320c6c545933a81ce5f80664, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sphereCollider: {fileID: 4261959746262440708}
+  playerLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
   pickUpType: 0
   magazinesToRecover: 2

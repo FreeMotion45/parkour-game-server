@@ -13,7 +13,12 @@ abstract class BasePickUp : MonoBehaviour
 {
     public static int currentId;
 
+    public SphereCollider sphereCollider;
+    public LayerMask playerLayerMask;
+
     public PickUpType pickUpType;
+
+    private HashSet<GameObject> playersInRange;    
 
     public BasePickUp()
     {
@@ -30,11 +35,25 @@ abstract class BasePickUp : MonoBehaviour
         PlayerDatabase.Publish(spawnMessage, DatagramType.PickUpSpawned);
     }
 
-    private void OnTriggerEnter(Collider other)
+    protected virtual void FixedUpdate()
     {
-        if (other.gameObject.CompareTag("Player"))
+        Collider[] colliders = Physics.OverlapSphere(transform.position, sphereCollider.radius, playerLayerMask);
+
+        // 1 because we are ignoring collision with ourself.
+        foreach (Collider collider in colliders)
         {
-            OnPickUp(other.gameObject);
+            if (collider == sphereCollider)
+                continue;
+
+            OnPlayerEntered(collider.gameObject);
         }
-    }  
+    }
+
+    private void OnPlayerEntered(GameObject player)
+    {
+        if (player.CompareTag("Player"))
+        {
+            OnPickUp(player);
+        }
+    } 
 }

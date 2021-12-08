@@ -1,7 +1,10 @@
-﻿using Assets.Scripts.Messages;
+﻿using Assets.Scripts.Game.Shared;
+using Assets.Scripts.Messages;
 using Assets.Scripts.Messages.ClientOrigin;
 using Assets.Scripts.Messages.ServerOrigin;
 using Assets.Scripts.Network.Messages.ServerOrigin;
+using Assets.Scripts.Network.Messages.ServerOrigin.PickUp;
+using Assets.Scripts.Network.Messages.ServerOrigin.PickUp.PickUpData;
 using Assets.Scripts.Network.Messages.ServerOrigin.PlayerState;
 using Assets.Scripts.Network.Messages.ServerOrigin.Weapon;
 using Assets.Scripts.Utils;
@@ -47,7 +50,9 @@ namespace Assets.Scripts.Network.Shared.Serializers
                 { DatagramType.PlayerHit, WritePlayerHit },
                 { DatagramType.PlayerKill, WritePlayerKill },
                 { DatagramType.ClientReloadRequest, WriteClientReloadRequest },
-                { DatagramType.ServerReloadResponse, WriteServerReloadResponse }
+                { DatagramType.ServerReloadResponse, WriteServerReloadResponse },
+                { DatagramType.PickUpSpawned, WritePickUpSpawnedMessage },
+                { DatagramType.PickUpPickedUp, WritePickUpPickedUpMessage }
             };
 
             deserializers = new Dictionary<DatagramType, Func<BinaryReader, object>>()
@@ -65,7 +70,9 @@ namespace Assets.Scripts.Network.Shared.Serializers
                 { DatagramType.PlayerHit, ReadPlayerHit },
                 { DatagramType.PlayerKill, ReadPlayerKill },
                 { DatagramType.ClientReloadRequest, ReadClientReloadRequest },
-                { DatagramType.ServerReloadResponse, ReadServerReloadResponse }
+                { DatagramType.ServerReloadResponse, ReadServerReloadResponse },
+                { DatagramType.PickUpSpawned, ReadPickUpSpawnedMessage },
+                { DatagramType.PickUpPickedUp, ReadPickUpPickedUpMessage }
             };
 
             //TestSerializer();
@@ -330,6 +337,61 @@ namespace Assets.Scripts.Network.Shared.Serializers
             return new ServerReloadResponseMessage(reader.ReadBoolean());
         }
 
+        public void WritePickUpSpawnedMessage(DatagramHolder dgram, BinaryWriter writer)
+        {
+            PickUpSpawnedMessage msg = (PickUpSpawnedMessage)dgram.Data;
+            writer.Write(msg.pickUpId);
+            writer.Write((int)msg.pickUpType);
+            WriteVector3(msg.position, writer);
+        }
+
+        public object ReadPickUpSpawnedMessage(BinaryReader reader)
+        {
+            PickUpSpawnedMessage message = new PickUpSpawnedMessage(reader.ReadInt32(),
+                (PickUpType)reader.ReadInt32(), ReadVector3(reader));
+            return message;
+        }
+
+        public void WritePickUpPickedUpMessage(DatagramHolder dgram, BinaryWriter writer)
+        {
+            PickUpPickedUpMessage msg = (PickUpPickedUpMessage)dgram.Data;
+
+            WriteClientID(msg.clientId, writer);
+            writer.Write(msg.pickUpId);
+
+            if (msg.pickUpData == null)
+                writer.Write(false);
+            else
+            {
+                writer.Write(true);
+
+                if (msg.pickUpData is AmmoMagazinePickUpData data)
+                {
+                    writer.Write((int)PickUpType.AmmoMagazine);
+                    writer.Write(data.magazinesRecovered);
+                }
+            }            
+        }
+
+        public object ReadPickUpPickedUpMessage(BinaryReader reader)
+        {
+            var clientId = ReadClientID(reader);
+            int pickUpId = reader.ReadInt32();
+            bool isPickUpDataInPacket = reader.ReadBoolean();
+
+            object pickUpData = null;            
+            if (isPickUpDataInPacket)
+            {
+                PickUpType pickUpType = (PickUpType)reader.ReadInt32();
+                if (pickUpType == PickUpType.AmmoMagazine)
+                {
+                    pickUpData = new AmmoMagazinePickUpData(reader.ReadInt32());
+                }
+            }
+
+            return new PickUpPickedUpMessage(clientId, pickUpId, pickUpData: pickUpData);
+        }
+
         private void WriteVector3(Vector3 vec, BinaryWriter writer)
         {
             writer.Write(vec.x);
@@ -343,7 +405,7 @@ namespace Assets.Scripts.Network.Shared.Serializers
             float y = reader.ReadSingle();
             float z = reader.ReadSingle();
             return new Vector3(x, y, z);
-        }
+        }        
 
         private void WriteQuaternion(Quaternion q, BinaryWriter writer)
         {

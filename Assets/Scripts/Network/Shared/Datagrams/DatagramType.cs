@@ -36,6 +36,6 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams
 
         // Pick ups
         PickUpSpawned,
-        PickUpTaken,
+        PickUpPickedUp,
     }
 }

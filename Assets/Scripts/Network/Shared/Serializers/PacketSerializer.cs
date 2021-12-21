@@ -297,11 +297,12 @@ namespace Assets.Scripts.Network.Shared.Serializers
             WriteClientID(msg.clientHitId, writer);
             WriteClientID(msg.attackerId, writer);
             writer.Write(msg.currentHealth);
+            WriteVector3(msg.bulletHitRelativeToHitPlayer, writer);
         }
 
         public object ReadPlayerHit(BinaryReader reader)
         {
-            return new PlayerHitMessage(ReadClientID(reader), ReadClientID(reader), reader.ReadInt32());
+            return new PlayerHitMessage(ReadClientID(reader), ReadClientID(reader), reader.ReadInt32(), ReadVector3(reader));
         }
 
         public void WritePlayerKill(DatagramHolder dgram, BinaryWriter writer)
@@ -370,7 +371,7 @@ namespace Assets.Scripts.Network.Shared.Serializers
                     writer.Write((int)PickUpType.AmmoMagazine);
                     writer.Write(data.magazinesRecovered);
                 }
-            }            
+            }
         }
 
         public object ReadPickUpPickedUpMessage(BinaryReader reader)
@@ -379,7 +380,7 @@ namespace Assets.Scripts.Network.Shared.Serializers
             int pickUpId = reader.ReadInt32();
             bool isPickUpDataInPacket = reader.ReadBoolean();
 
-            object pickUpData = null;            
+            object pickUpData = null;
             if (isPickUpDataInPacket)
             {
                 PickUpType pickUpType = (PickUpType)reader.ReadInt32();
@@ -405,7 +406,7 @@ namespace Assets.Scripts.Network.Shared.Serializers
             float y = reader.ReadSingle();
             float z = reader.ReadSingle();
             return new Vector3(x, y, z);
-        }        
+        }
 
         private void WriteQuaternion(Quaternion q, BinaryWriter writer)
         {

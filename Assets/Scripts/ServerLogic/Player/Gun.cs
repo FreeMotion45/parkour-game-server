@@ -29,19 +29,19 @@ namespace Assets.Scripts.ServerLogic.Player
             gunLogic = new GunLogic(0.2f, 2, 8, 8);
         }
 
-        public GameObject Shoot(Quaternion playerRotation, LayerMask mask)
+        public bool Shoot(Quaternion playerRotation, LayerMask mask, out RaycastHit info)
         {
+            info = new RaycastHit();
+
             if (gunLogic.TryShoot())
             {                
                 q = playerRotation;
                 Vector3 middleOfScreenInWorldSpace = playerCamera.ViewportToWorldPoint(viewportCenter);
-                bool hitAnything = projectileDispatcher.RaycastBullet(playerRotation, middleOfScreenInWorldSpace,
-                    mask, maxShootingDistance, out RaycastHit info);
-
-                if (hitAnything)
-                    return info.collider.gameObject;                
+                projectileDispatcher.RaycastBullet(playerRotation, middleOfScreenInWorldSpace,
+                    mask, maxShootingDistance, out info);
+                return true;
             }
-            return null;
+            return false;
         }
 
         public bool Reload()

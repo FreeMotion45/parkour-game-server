@@ -50,14 +50,14 @@ namespace Assets.Scripts.Handlers
             player.layer = temporaryLayer;
 
             Gun playerGun = PlayerDatabase.GetComponent<Gun>(networkChannel);            
-            GameObject objectHit = playerGun.Shoot(playerRotation, hittableLayers);
+            bool hit = playerGun.Shoot(playerRotation, hittableLayers, out RaycastHit bulletHit);
 
             // Moving the from the temporary layer to his original one.
             player.layer = originalLayer;
 
-            if (objectHit != null)
+            if (hit)
             {                
-                HandleObjectHit(networkChannel, objectHit);
+                HandleObjectHit(networkChannel, bulletHit);
             }
             else
             {
@@ -65,8 +65,9 @@ namespace Assets.Scripts.Handlers
             }
         }
 
-        private void HandleObjectHit(NetworkChannel shooterChannel, GameObject objectHit)
+        private void HandleObjectHit(NetworkChannel shooterChannel, RaycastHit bulletHit)
         {
+            GameObject objectHit = bulletHit.collider.gameObject;
             if (!objectHit.CompareTag("Player")) return;
 
             PlayerGameState info = objectHit.GetComponent<PlayerGameState>();
@@ -93,8 +94,9 @@ namespace Assets.Scripts.Handlers
                 playerRespawner.RespawnPlayer(hitChannel);
             }
             else
-            {                
-                data = new PlayerHitMessage(idOfHitPlayer, shooterChannel.ChannelID, hitPlayerHealth);
+            {
+                Vector3 relativeHitPos = bulletHit.point - objectHit.transform.position;
+                data = new PlayerHitMessage(idOfHitPlayer, shooterChannel.ChannelID, hitPlayerHealth, relativeHitPos);
                 type = DatagramType.PlayerHit;
                 Debug.Log($"{PlayerDatabase.GetName(shooterChannel)} reduced {objectHit.name}'s health to {info.health}");
             }

@@ -37,5 +37,9 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams
         // Pick ups
         PickUpSpawned,
         PickUpPickedUp,
+
+        // Inventory
+        InventorySelectSlot,
+        InventoryDropSlot,
     }
 }

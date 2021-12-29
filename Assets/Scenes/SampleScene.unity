@@ -22394,7 +22394,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd0b7a6850f9f874cbfab6718c367a74, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interpolationTime: 0.1
+  interpolationTime: 0.05
 --- !u!114 &2072599660
 MonoBehaviour:
   m_ObjectHideFlags: 0

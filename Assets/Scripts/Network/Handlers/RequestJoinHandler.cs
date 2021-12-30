@@ -29,7 +29,7 @@ namespace Assets.Scripts.Handlers
             GameObject player = Instantiate(playerPrefab, spawnPosition, Quaternion.identity);
             player.name = request.name;
 
-            PlayerDatabase.players[networkChannel] = player;
+            GamePlayers.players[networkChannel] = player;
 
             LinkCurrentPlayersToIDs(networkChannel);
             Thread.Sleep(100);
@@ -39,14 +39,14 @@ namespace Assets.Scripts.Handlers
             Debug.Log("Spawning player at: " + spawnPosition);
 
             PlayerJoinMessage playerJoinMessage = new PlayerJoinMessage(networkChannel.ChannelID, request.name, spawnPosition);
-            PlayerDatabase.Publish(playerJoinMessage, DatagramType.PlayerJoin);
+            GamePlayers.Publish(playerJoinMessage, DatagramType.PlayerJoin);
         }
 
         private void LinkCurrentPlayersToIDs(BaseNetworkChannel channel)
         {
-            foreach (BaseNetworkChannel connectedChannel in PlayerDatabase.players.Keys)
+            foreach (BaseNetworkChannel connectedChannel in GamePlayers.players.Keys)
             {
-                string name = PlayerDatabase.GetName(connectedChannel);
+                string name = GamePlayers.GetName(connectedChannel);
                 LinkPlayerNameToIDMessage link = new LinkPlayerNameToIDMessage(connectedChannel.ChannelID, name);
                 channel.Send(link, DatagramType.LinkNameToID);
             }
@@ -54,12 +54,12 @@ namespace Assets.Scripts.Handlers
 
         private void SendCurrentWorldState(BaseNetworkChannel channel)
         {
-            IEnumerable<PlayerInformation> playerInformation = PlayerDatabase.players.Keys
+            IEnumerable<PlayerInformation> playerInformation = GamePlayers.players.Keys
                 .Where(network => network != channel)
                 .Select(network =>
                 {
-                    Vector3 position = PlayerDatabase.GetPosition(network);
-                    Quaternion rotation = PlayerDatabase.GetTransform(network).transform.Find("Camera").rotation;
+                    Vector3 position = GamePlayers.GetPosition(network);
+                    Quaternion rotation = GamePlayers.GetTransform(network).transform.Find("Camera").rotation;
                     return new PlayerInformation(network.ChannelID, position, rotation);
                 });
 

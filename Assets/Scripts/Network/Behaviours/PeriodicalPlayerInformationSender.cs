@@ -17,40 +17,62 @@ namespace Assets.Scripts.Server
     {
         public static PeriodicalPlayerInformationSender Instance;
 
-        private readonly List<NetTransform> netTransforms = new List<NetTransform>();
+        private readonly List<GameObject> netTransforms = new List<GameObject>();
 
         public float interpolationTime = 0.2f;
 
-        private void Start()
+        void Start()
         {
             StartCoroutine(SendTransformData());
             Instance = this;
-        }
+        }        
 
         IEnumerator SendTransformData()
         {
             while (isActiveAndEnabled)
             {
                 yield return new WaitForSeconds(interpolationTime);
-
-                if (PlayerDatabase.players.Count == 0) continue;
-
-                IEnumerable<PlayerInformation> playerInformation = PlayerDatabase.players
-                    .Select(pair =>
-                    {
-                        Transform transform = pair.Value.transform;
-                        Quaternion rotation = pair.Value.transform.Find("Camera").rotation;
-                        return new PlayerInformation(pair.Key.ChannelID, transform.position, rotation);
-                    });
-                PlayersUpdateMessage playersUpdateMessage = new PlayersUpdateMessage(playerInformation);
-
-                PlayerDatabase.Publish(playersUpdateMessage, DatagramType.PlayersUpdate, transport: Shared.TransportType.Unreliable);                
+                SendPlayersUpdate();
+                SendTransformsUpdate();
             }            
         }
 
-        public void Add(NetTransform netTransform)
+        private void SendPlayersUpdate()
+        {
+            if (GamePlayers.players.Count == 0) return;
+
+            IEnumerable<PlayerInformation> playerInformation = GamePlayers.players
+                .Select(pair =>
+                {
+                    Transform transform = pair.Value.transform;
+                    Quaternion rotation = pair.Value.transform.Find("Camera").rotation;
+                    return new PlayerInformation(pair.Key.ChannelID, transform.position, rotation);
+                });
+
+            PlayersUpdateMessage playersUpdateMessage = new PlayersUpdateMessage(playerInformation);
+            GamePlayers.Publish(playersUpdateMessage, DatagramType.PlayersUpdate, transport: Shared.TransportType.Unreliable);
+        }
+
+        private void SendTransformsUpdate()
+        {
+            if (netTransforms.Count == 0) return;
+
+            IEnumerable<Vector3> positions = netTransforms.Select(net => net.transform.position);
+            IEnumerable<Quaternion> rotations = netTransforms.Select(net => net.transform.rotation);
+            IEnumerable<int> hashes = netTransforms.Select(net => NetTransform.objectHash[net]);
+
+            TransformsUpdateMessage transformsUpdateMessage = new TransformsUpdateMessage(hashes, positions, rotations);
+            GamePlayers.Publish(transformsUpdateMessage, DatagramType.TransformsUpdate, transport: Shared.TransportType.Unreliable);
+        }
+
+        public void Add(GameObject netTransform)
         {
             netTransforms.Add(netTransform);
+        }
+
+        public void Remove(GameObject netTransform)
+        {
+            netTransforms.Remove(netTransform);
         }
     }
 }

@@ -19,8 +19,8 @@ class AmmoMagazinePickUp : BasePickUp
         player.GetComponent<Gun>().gunLogic.MagazinesAvailable += magazinesToRecover;
 
         AmmoMagazinePickUpData data = new AmmoMagazinePickUpData(magazinesToRecover);
-        PickUpPickedUpMessage message = new PickUpPickedUpMessage(PlayerDatabase.GetChannelID(player), PickUpID, data);
-        PlayerDatabase.Publish(message, DatagramType.PickUpPickedUp);
+        PickUpPickedUpMessage message = new PickUpPickedUpMessage(GamePlayers.GetChannelID(player), PickUpID, data);
+        GamePlayers.Publish(message, DatagramType.PickUpPickedUp);
 
         Destroy(gameObject);
     }

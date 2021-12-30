@@ -29,14 +29,14 @@ namespace Assets.Scripts.ServerLogic
             yield return new WaitForSeconds(respawnTime);
 
             Vector3 spawnPosition = GetRespawnPosition();
-            var state = PlayerDatabase.GetComponent<PlayerGameState>(player);
+            var state = GamePlayers.GetComponent<PlayerGameState>(player);
             state.RevivePlayer(state.maxHealth);
 
             // Not doing the line below because the client is position authorative.
             // player.transform.position = spawnPosition;
 
             PlayerSpawnMessage spawnMessage = new PlayerSpawnMessage(player.ChannelID, spawnPosition);
-            PlayerDatabase.Publish(spawnMessage, DatagramType.PlayerSpawn);
+            GamePlayers.Publish(spawnMessage, DatagramType.PlayerSpawn);
         }
 
         public Vector3 GetRespawnPosition()

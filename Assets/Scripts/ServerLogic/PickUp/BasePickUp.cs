@@ -32,7 +32,7 @@ abstract class BasePickUp : MonoBehaviour
     private void OnEnable()
     {
         PickUpSpawnedMessage spawnMessage = new PickUpSpawnedMessage(PickUpID, pickUpType, transform.position);
-        PlayerDatabase.Publish(spawnMessage, DatagramType.PickUpSpawned);
+        GamePlayers.Publish(spawnMessage, DatagramType.PickUpSpawned);
     }
 
     protected virtual void FixedUpdate()

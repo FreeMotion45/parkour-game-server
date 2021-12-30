@@ -36,7 +36,7 @@ namespace Assets.Scripts.Handlers
 
         public override void Handle(DatagramHolder deserializedDatagram, NetworkChannel networkChannel)
         {
-            PlayerDatabase.Publish(deserializedDatagram, sender: networkChannel);
+            GamePlayers.Publish(deserializedDatagram, sender: networkChannel);
 
             // Get initial data.
             PlayerShootMessage message = (PlayerShootMessage)deserializedDatagram.Data;
@@ -45,11 +45,11 @@ namespace Assets.Scripts.Handlers
 
             // Moving the player to a temporary isolated layer,
             // so he doesn't hit himself when shooting.
-            GameObject player = PlayerDatabase.GetPlayerObject(networkChannel);
+            GameObject player = GamePlayers.GetPlayerObject(networkChannel);
             int originalLayer = player.layer;
             player.layer = temporaryLayer;
 
-            Gun playerGun = PlayerDatabase.GetComponent<Gun>(networkChannel);            
+            Gun playerGun = GamePlayers.GetComponent<Gun>(networkChannel);            
             bool hit = playerGun.Shoot(playerRotation, hittableLayers, out RaycastHit bulletHit);
 
             // Moving the from the temporary layer to his original one.
@@ -61,7 +61,7 @@ namespace Assets.Scripts.Handlers
             }
             else
             {
-                Debug.Log($"{PlayerDatabase.GetName(networkChannel)} shot and hit nothing");
+                Debug.Log($"{GamePlayers.GetName(networkChannel)} shot and hit nothing");
             }
         }
 
@@ -71,12 +71,12 @@ namespace Assets.Scripts.Handlers
             if (!objectHit.CompareTag("Player")) return;
 
             PlayerGameState info = objectHit.GetComponent<PlayerGameState>();
-            BaseNetworkChannel hitChannel = PlayerDatabase.GetChannel(objectHit);
+            BaseNetworkChannel hitChannel = GamePlayers.GetChannel(objectHit);
             int idOfHitPlayer = hitChannel.ChannelID;
 
             if (info.IsDead())
             {
-                Debug.Log($"{PlayerDatabase.GetName(shooterChannel)} shot and hit a dead player");
+                Debug.Log($"{GamePlayers.GetName(shooterChannel)} shot and hit a dead player");
                 return;
             }
 
@@ -90,7 +90,7 @@ namespace Assets.Scripts.Handlers
             {
                 data = new PlayerKillMessage(idOfHitPlayer, shooterChannel.ChannelID);                
                 type = DatagramType.PlayerKill;
-                Debug.Log($"{PlayerDatabase.GetName(shooterChannel)} killed {objectHit.name}");
+                Debug.Log($"{GamePlayers.GetName(shooterChannel)} killed {objectHit.name}");
                 playerRespawner.RespawnPlayer(hitChannel);
             }
             else
@@ -98,10 +98,10 @@ namespace Assets.Scripts.Handlers
                 Vector3 relativeHitPos = bulletHit.point - objectHit.transform.position;
                 data = new PlayerHitMessage(idOfHitPlayer, shooterChannel.ChannelID, hitPlayerHealth, relativeHitPos);
                 type = DatagramType.PlayerHit;
-                Debug.Log($"{PlayerDatabase.GetName(shooterChannel)} reduced {objectHit.name}'s health to {info.health}");
+                Debug.Log($"{GamePlayers.GetName(shooterChannel)} reduced {objectHit.name}'s health to {info.health}");
             }
 
-            PlayerDatabase.Publish(data, type);
+            GamePlayers.Publish(data, type);
         }
     }
 }

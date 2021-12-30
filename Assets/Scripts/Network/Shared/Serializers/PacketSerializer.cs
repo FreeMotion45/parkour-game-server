@@ -2,18 +2,17 @@
 using Assets.Scripts.Messages;
 using Assets.Scripts.Messages.ClientOrigin;
 using Assets.Scripts.Messages.ServerOrigin;
+using Assets.Scripts.Network.Messages.ClientOrigin.Inventory;
 using Assets.Scripts.Network.Messages.ServerOrigin;
+using Assets.Scripts.Network.Messages.ServerOrigin.Inventory;
 using Assets.Scripts.Network.Messages.ServerOrigin.PickUp;
 using Assets.Scripts.Network.Messages.ServerOrigin.PickUp.PickUpData;
 using Assets.Scripts.Network.Messages.ServerOrigin.PlayerState;
 using Assets.Scripts.Network.Messages.ServerOrigin.Weapon;
-using Assets.Scripts.Utils;
+using Assets.Scripts.Network.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityMultiplayer.Shared.Networking.Datagrams;
 using UnityMultiplayer.Shared.Networking.Serializers;
@@ -37,6 +36,7 @@ namespace Assets.Scripts.Network.Shared.Serializers
         {
             serializers = new Dictionary<DatagramType, Action<DatagramHolder, BinaryWriter>>()
             {
+                { DatagramType.TransformsUpdate, WriteTransformsUpdateMessage },
                 { DatagramType.RequestJoin, WriteRequestJoin },
                 { DatagramType.PlayerJoin, WritePlayerJoin },
                 { DatagramType.WorldState, WriteOnJoinWorldState },
@@ -52,11 +52,16 @@ namespace Assets.Scripts.Network.Shared.Serializers
                 { DatagramType.ClientReloadRequest, WriteClientReloadRequest },
                 { DatagramType.ServerReloadResponse, WriteServerReloadResponse },
                 { DatagramType.PickUpSpawned, WritePickUpSpawnedMessage },
-                { DatagramType.PickUpPickedUp, WritePickUpPickedUpMessage }
+                { DatagramType.PickUpPickedUp, WritePickUpPickedUpMessage },
+                { DatagramType.InventoryDropSlotRequest, WriteInventorySlotMessage },
+                { DatagramType.InventorySelectSlotRequest, WriteInventorySlotMessage },
+                { DatagramType.InventoryDropSlotConfirm, WriteServerInventoryDropItemMessage },
+                { DatagramType.InventorySelectSlotConfirm, WriteServerInventorySlotMessage },
             };
 
             deserializers = new Dictionary<DatagramType, Func<BinaryReader, object>>()
             {
+                { DatagramType.TransformsUpdate, ReadTransformsUpdateMessage },
                 { DatagramType.RequestJoin, ReadRequestJoin },
                 { DatagramType.PlayerJoin, ReadPlayerJoin },
                 { DatagramType.WorldState, ReadOnJoinWorldState },
@@ -72,7 +77,12 @@ namespace Assets.Scripts.Network.Shared.Serializers
                 { DatagramType.ClientReloadRequest, ReadClientReloadRequest },
                 { DatagramType.ServerReloadResponse, ReadServerReloadResponse },
                 { DatagramType.PickUpSpawned, ReadPickUpSpawnedMessage },
-                { DatagramType.PickUpPickedUp, ReadPickUpPickedUpMessage }
+                { DatagramType.PickUpPickedUp, ReadPickUpPickedUpMessage },
+                { DatagramType.InventorySelectSlotRequest, ReadInventorySlotMessage },
+                { DatagramType.InventoryDropSlotRequest, ReadInventorySlotMessage },
+                { DatagramType.InventorySelectSlotConfirm, ReadServerInventorySlotMessage },
+                { DatagramType.InventoryDropSlotConfirm, ReadServerInventoryDropItemMessage },
+
             };
 
             //TestSerializer();
@@ -132,7 +142,7 @@ namespace Assets.Scripts.Network.Shared.Serializers
                     if (!special.Contains(datagramType))
                         data = deserializers[datagramType](reader);
                     else if (datagramType == DatagramType.ServerHandshakeResponse)
-                        data = ReadClientID(reader);
+                        data = reader.ReadClientID();
 
                     return new DatagramHolder(datagramType, data);
                 }
@@ -151,7 +161,7 @@ namespace Assets.Scripts.Network.Shared.Serializers
                     if (!special.Contains(datagramHolder.DatagramType))
                         serializers[datagramHolder.DatagramType](datagramHolder, writer);
                     else if (datagramHolder.DatagramType == DatagramType.ServerHandshakeResponse)
-                        WriteClientID((int)datagramHolder.Data, writer);
+                        writer.WriteClientID((int)datagramHolder.Data);
 
                     return ms.ToArray();
                 }
@@ -161,25 +171,25 @@ namespace Assets.Scripts.Network.Shared.Serializers
         private void WriteMovePlayer(DatagramHolder dgram, BinaryWriter writer)
         {
             MovePlayerMessage msg = (MovePlayerMessage)dgram.Data;
-            WriteVector3(msg.Position, writer);
-            WriteQuaternion(msg.Rotation, writer);
+            writer.Write(msg.Position);
+            writer.Write(msg.Rotation);
         }
 
         private object ReadMovePlayer(BinaryReader reader)
         {
-            return new MovePlayerMessage(ReadVector3(reader), ReadQuaternion(reader));
+            return new MovePlayerMessage(reader.ReadVector3(), reader.ReadQuaternion());
         }
 
         private void WritePlayerShoot(DatagramHolder dgram, BinaryWriter writer)
         {
             PlayerShootMessage msg = (PlayerShootMessage)dgram.Data;
-            WriteClientID(msg.clientId, writer);
-            WriteQuaternion(msg.Rotation, writer);
+            writer.WriteClientID(msg.clientId);
+            writer.Write(msg.Rotation);
         }
 
         private object ReadPlayerShoot(BinaryReader reader)
         {
-            return new PlayerShootMessage(reader.ReadInt32(), ReadQuaternion(reader));
+            return new PlayerShootMessage(reader.ReadInt32(), reader.ReadQuaternion());
         }
 
         private void WriteRequestJoin(DatagramHolder dgram, BinaryWriter writer)
@@ -196,36 +206,36 @@ namespace Assets.Scripts.Network.Shared.Serializers
         private void WritePlayerDeath(DatagramHolder dgram, BinaryWriter writer)
         {
             PlayerDeathMessage msg = (PlayerDeathMessage)dgram.Data;
-            WriteClientID(msg.clientId, writer);
+            writer.WriteClientID(msg.clientId);
         }
 
         private object ReadPlayerDeath(BinaryReader reader)
         {
-            return new PlayerDeathMessage(ReadClientID(reader));
+            return new PlayerDeathMessage(reader.ReadClientID());
         }
 
         private void WritePlayerHealthChange(DatagramHolder dgram, BinaryWriter writer)
         {
             PlayerHealthChangeMessage msg = (PlayerHealthChangeMessage)dgram.Data;
-            WriteClientID(msg.clientId, writer);
+            writer.WriteClientID(msg.clientId);
             writer.Write(msg.currentHealth);
         }
 
         private object ReadPlayerHealthChange(BinaryReader reader)
         {
-            return new PlayerHealthChangeMessage(ReadClientID(reader), reader.ReadInt32());
+            return new PlayerHealthChangeMessage(reader.ReadClientID(), reader.ReadInt32());
         }
 
         private void WriteLinkPlayerNameToID(DatagramHolder dgram, BinaryWriter writer)
         {
             LinkPlayerNameToIDMessage msg = (LinkPlayerNameToIDMessage)dgram.Data;
-            WriteClientID(msg.id, writer);
+            writer.WriteClientID(msg.id);
             writer.Write(msg.name);
         }
 
         private object ReadLinkPlayerNameToIDMessage(BinaryReader reader)
         {
-            return new LinkPlayerNameToIDMessage(ReadClientID(reader), reader.ReadString());
+            return new LinkPlayerNameToIDMessage(reader.ReadClientID(), reader.ReadString());
         }
 
         private void WriteOnJoinWorldState(DatagramHolder dgram, BinaryWriter writer)
@@ -234,9 +244,9 @@ namespace Assets.Scripts.Network.Shared.Serializers
             writer.Write(msg.playerInformation.Length);
             foreach (PlayerInformation info in msg.playerInformation)
             {
-                WriteClientID(info.networkID, writer);
-                WriteVector3(info.Position, writer);
-                WriteQuaternion(info.Rotation, writer);
+                writer.WriteClientID(info.networkID);
+                writer.Write(info.Position);
+                writer.Write(info.Rotation);
             }
         }
 
@@ -246,7 +256,7 @@ namespace Assets.Scripts.Network.Shared.Serializers
             PlayerInformation[] infos = new PlayerInformation[infoLength];
             for (int i = 0; i < infoLength; i++)
             {
-                infos[i] = new PlayerInformation(ReadClientID(reader), ReadVector3(reader), ReadQuaternion(reader));
+                infos[i] = new PlayerInformation(reader.ReadClientID(), reader.ReadVector3(), reader.ReadQuaternion());
             }
             return new OnJoinWorldState(infos);
         }
@@ -254,14 +264,14 @@ namespace Assets.Scripts.Network.Shared.Serializers
         private void WritePlayerJoin(DatagramHolder dgram, BinaryWriter writer)
         {
             PlayerJoinMessage msg = (PlayerJoinMessage)dgram.Data;
-            WriteClientID(msg.clientId, writer);
+            writer.WriteClientID(msg.clientId);
             writer.Write(msg.playerName);
-            WriteVector3(msg.Position, writer);
+            writer.Write(msg.Position);
         }
 
         private object ReadPlayerJoin(BinaryReader reader)
         {
-            PlayerJoinMessage joinMessage = new PlayerJoinMessage(ReadClientID(reader), reader.ReadString(), ReadVector3(reader));
+            PlayerJoinMessage joinMessage = new PlayerJoinMessage(reader.ReadClientID(), reader.ReadString(), reader.ReadVector3());
             return joinMessage;
         }
 
@@ -282,39 +292,39 @@ namespace Assets.Scripts.Network.Shared.Serializers
         public void WritePlayerSpawn(DatagramHolder dgram, BinaryWriter writer)
         {
             PlayerSpawnMessage msg = (PlayerSpawnMessage)dgram.Data;
-            WriteClientID(msg.clientId, writer);
-            WriteVector3(msg.Position, writer);
+            writer.WriteClientID(msg.clientId);
+            writer.Write(msg.Position);
         }
 
         public object ReadPlayerSpawn(BinaryReader reader)
         {
-            return new PlayerSpawnMessage(ReadClientID(reader), ReadVector3(reader));
+            return new PlayerSpawnMessage(reader.ReadClientID(), reader.ReadVector3());
         }
 
         public void WritePlayerHit(DatagramHolder dgram, BinaryWriter writer)
         {
             PlayerHitMessage msg = (PlayerHitMessage)dgram.Data;
-            WriteClientID(msg.clientHitId, writer);
-            WriteClientID(msg.attackerId, writer);
+            writer.WriteClientID(msg.clientHitId);
+            writer.WriteClientID(msg.attackerId);
             writer.Write(msg.currentHealth);
-            WriteVector3(msg.bulletHitRelativeToHitPlayer, writer);
+            writer.Write(msg.bulletHitRelativeToHitPlayer);
         }
 
         public object ReadPlayerHit(BinaryReader reader)
         {
-            return new PlayerHitMessage(ReadClientID(reader), ReadClientID(reader), reader.ReadInt32(), ReadVector3(reader));
+            return new PlayerHitMessage(reader.ReadClientID(), reader.ReadClientID(), reader.ReadInt32(), reader.ReadVector3());
         }
 
         public void WritePlayerKill(DatagramHolder dgram, BinaryWriter writer)
         {
             PlayerKillMessage msg = (PlayerKillMessage)dgram.Data;
-            WriteClientID(msg.deadClientId, writer);
-            WriteClientID(msg.killerId, writer);
+            writer.WriteClientID(msg.deadClientId);
+            writer.WriteClientID(msg.killerId);
         }
 
         public object ReadPlayerKill(BinaryReader reader)
         {
-            return new PlayerKillMessage(ReadClientID(reader), ReadClientID(reader));
+            return new PlayerKillMessage(reader.ReadClientID(), reader.ReadClientID());
         }
 
         public void WriteClientReloadRequest(DatagramHolder dgram, BinaryWriter writer)
@@ -343,13 +353,13 @@ namespace Assets.Scripts.Network.Shared.Serializers
             PickUpSpawnedMessage msg = (PickUpSpawnedMessage)dgram.Data;
             writer.Write(msg.pickUpId);
             writer.Write((int)msg.pickUpType);
-            WriteVector3(msg.position, writer);
+            writer.Write(msg.position);
         }
 
         public object ReadPickUpSpawnedMessage(BinaryReader reader)
         {
             PickUpSpawnedMessage message = new PickUpSpawnedMessage(reader.ReadInt32(),
-                (PickUpType)reader.ReadInt32(), ReadVector3(reader));
+                (PickUpType)reader.ReadInt32(), reader.ReadVector3());
             return message;
         }
 
@@ -357,7 +367,7 @@ namespace Assets.Scripts.Network.Shared.Serializers
         {
             PickUpPickedUpMessage msg = (PickUpPickedUpMessage)dgram.Data;
 
-            WriteClientID(msg.clientId, writer);
+            writer.WriteClientID(msg.clientId);
             writer.Write(msg.pickUpId);
 
             if (msg.pickUpData == null)
@@ -376,7 +386,7 @@ namespace Assets.Scripts.Network.Shared.Serializers
 
         public object ReadPickUpPickedUpMessage(BinaryReader reader)
         {
-            var clientId = ReadClientID(reader);
+            var clientId = reader.ReadClientID();
             int pickUpId = reader.ReadInt32();
             bool isPickUpDataInPacket = reader.ReadBoolean();
 
@@ -393,46 +403,70 @@ namespace Assets.Scripts.Network.Shared.Serializers
             return new PickUpPickedUpMessage(clientId, pickUpId, pickUpData: pickUpData);
         }
 
-        private void WriteVector3(Vector3 vec, BinaryWriter writer)
+        public void WriteInventorySlotMessage(DatagramHolder dgram, BinaryWriter writer)
         {
-            writer.Write(vec.x);
-            writer.Write(vec.y);
-            writer.Write(vec.z);
+            InventorySlotMessage msg = (InventorySlotMessage)dgram.Data;
+            writer.Write(msg.slotIndex);
         }
 
-        private Vector3 ReadVector3(BinaryReader reader)
+        public object ReadInventorySlotMessage(BinaryReader reader)
         {
-            float x = reader.ReadSingle();
-            float y = reader.ReadSingle();
-            float z = reader.ReadSingle();
-            return new Vector3(x, y, z);
+            return new InventorySlotMessage(reader.ReadInt32());
         }
 
-        private void WriteQuaternion(Quaternion q, BinaryWriter writer)
+        public void WriteServerInventorySlotMessage(DatagramHolder dgram, BinaryWriter writer)
         {
-            writer.Write(q.x);
-            writer.Write(q.y);
-            writer.Write(q.z);
-            writer.Write(q.w);
+            ServerInventorySlotMessage msg = (ServerInventorySlotMessage)dgram.Data;
+            WriteInventorySlotMessage(dgram, writer);
+            writer.WriteClientID(msg.senderId);
         }
 
-        private Quaternion ReadQuaternion(BinaryReader reader)
+        public object ReadServerInventorySlotMessage(BinaryReader reader)
         {
-            float x = reader.ReadSingle();
-            float y = reader.ReadSingle();
-            float z = reader.ReadSingle();
-            float w = reader.ReadSingle();
-            return new Quaternion(x, y, z, w);
+            InventorySlotMessage baseMsg = (InventorySlotMessage)ReadInventorySlotMessage(reader);
+            return new ServerInventorySlotMessage(reader.ReadClientID(), baseMsg.slotIndex);
         }
 
-        private void WriteClientID(int clientId, BinaryWriter writer)
+        public void WriteServerInventoryDropItemMessage(DatagramHolder dgram, BinaryWriter writer)
         {
-            writer.Write(clientId);
+            ServerInventoryDropItemMessage msg = (ServerInventoryDropItemMessage)dgram.Data;
+            WriteServerInventorySlotMessage(dgram, writer);
+            writer.Write(msg.droppedItemTransformHash);
         }
 
-        private int ReadClientID(BinaryReader reader)
+        public object ReadServerInventoryDropItemMessage(BinaryReader reader)
         {
-            return reader.ReadInt32();
+            ServerInventorySlotMessage baseMsg = (ServerInventorySlotMessage)ReadServerInventorySlotMessage(reader);
+            return new ServerInventoryDropItemMessage(baseMsg.senderId, baseMsg.slotIndex, reader.ReadInt32());
+        }
+
+        public void WriteTransformsUpdateMessage(DatagramHolder dgram, BinaryWriter writer)
+        {
+            TransformsUpdateMessage msg = (TransformsUpdateMessage)dgram.Data;
+            writer.Write(msg.transformHashes.Length);
+            for (int i = 0; i < msg.transformHashes.Length; i++)
+            {
+                writer.Write(msg.transformHashes[i]);
+                writer.Write(msg.Positions[i]);
+                writer.Write(msg.Rotations[i]);
+            }
+        }
+
+        public object ReadTransformsUpdateMessage(BinaryReader reader)
+        {
+            List<int> hashes = new List<int>();
+            List<Vector3> positions = new List<Vector3>();
+            List<Quaternion> rotations = new List<Quaternion>();
+
+            int count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                hashes.Add(reader.ReadInt32());
+                positions.Add(reader.ReadVector3());
+                rotations.Add(reader.ReadQuaternion());
+            }
+
+            return new TransformsUpdateMessage(hashes, positions, rotations);
         }
     }
 }

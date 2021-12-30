@@ -4,16 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assets.Scripts.Network.Messages.ClientOrigin
+namespace Assets.Scripts.Network.Messages.ClientOrigin.Inventory
 {
     [Serializable]
     class InventorySlotMessage
     {
-        public int slotToSelect;
+        public int slotIndex;
 
-        public InventorySlotMessage(int slotToSelect)
+        public InventorySlotMessage(int slotIndex)
         {
-            this.slotToSelect = slotToSelect;
+            this.slotIndex = slotIndex;
         }
     }
 }

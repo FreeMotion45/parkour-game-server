@@ -17,7 +17,7 @@ namespace Assets.Scripts.ServerLogic.Handlers
         public override void Handle(DatagramHolder deserializedDatagram, NetworkChannel networkChannel)
         {
             // Datagram is null. Checking the gun in hand.
-            Gun playerGun = PlayerDatabase.GetComponent<Gun>(networkChannel);
+            Gun playerGun = GamePlayers.GetComponent<Gun>(networkChannel);
             bool reloadSuccessful = playerGun.Reload();
 
             Debug.Log($"{networkChannel.ChannelID} successfully reloaded? " + reloadSuccessful);

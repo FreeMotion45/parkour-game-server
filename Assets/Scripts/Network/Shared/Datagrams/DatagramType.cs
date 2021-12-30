@@ -39,7 +39,11 @@ namespace UnityMultiplayer.Shared.Networking.Datagrams
         PickUpPickedUp,
 
         // Inventory
-        InventorySelectSlot,
-        InventoryDropSlot,
+        InventorySelectSlotRequest,
+        InventoryDropSlotRequest,
+
+        // Server Inventory
+        InventorySelectSlotConfirm,
+        InventoryDropSlotConfirm,
     }
 }

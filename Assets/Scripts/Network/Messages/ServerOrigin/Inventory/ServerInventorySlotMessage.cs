@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Network.Messages.ClientOrigin;
+using Assets.Scripts.Network.Messages.ClientOrigin.Inventory;
 using Assets.Scripts.Shared;
 using System;
 using System.Collections.Generic;
@@ -12,10 +13,16 @@ namespace Assets.Scripts.Network.Messages.ServerOrigin.Inventory
     {
         public int senderId;
 
-        public ServerInventorySlotMessage(BaseNetworkChannel senderChannel, int slotToSelect)
-            : base(slotToSelect)
+        public ServerInventorySlotMessage(BaseNetworkChannel senderChannel, int slotIndex)
+            : base(slotIndex)
         {
             senderId = senderChannel.ChannelID;
+        }
+
+        public ServerInventorySlotMessage(int senderId, int slotIndex)
+            : base(slotIndex)
+        {
+            this.senderId = senderId;
         }
     }
 }

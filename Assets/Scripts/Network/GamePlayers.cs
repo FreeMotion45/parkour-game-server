@@ -10,7 +10,7 @@ using UnityMultiplayer.Shared.Networking.Datagrams;
 
 namespace Assets.Scripts.ServerLogic
 {
-    class PlayerDatabase : MonoBehaviour
+    class GamePlayers : MonoBehaviour
     {
         public static readonly Dictionary<BaseNetworkChannel, GameObject> players = new Dictionary<BaseNetworkChannel, GameObject>();
 

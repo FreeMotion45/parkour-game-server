@@ -17,13 +17,20 @@ namespace Assets.Scripts.ServerLogic.Handlers
         public override void Handle(DatagramHolder deserializedDatagram, NetworkChannel networkChannel)
         {
             // Datagram is null. Checking the gun in hand.
-            Gun playerGun = GamePlayers.GetComponent<Gun>(networkChannel);
-            bool reloadSuccessful = playerGun.Reload();
+            BaseGun playerGun = GetGunCurrentGun(networkChannel);
+            bool reloadSuccessful = playerGun.TryReload();
 
             Debug.Log($"{networkChannel.ChannelID} successfully reloaded? " + reloadSuccessful);
 
             networkChannel.Send(new ServerReloadResponseMessage(reloadSuccessful),
                 DatagramType.ServerReloadResponse);
+        }
+
+        private BaseGun GetGunCurrentGun(NetworkChannel channel)
+        {
+            return GamePlayers.GetComponent<Transform>(channel)
+                .Find("Camera")
+                .GetComponentInChildren<BaseGun>();
         }
     }
 }

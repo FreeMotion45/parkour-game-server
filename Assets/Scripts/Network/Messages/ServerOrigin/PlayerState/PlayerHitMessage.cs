@@ -13,15 +13,15 @@ namespace Assets.Scripts.Network.Messages.ServerOrigin.PlayerState
         public int clientHitId;
         public int attackerId;
         public int currentHealth;
-        public Vector3 bulletHitRelativeToHitPlayer;
+        public Vector3[] projectileHitsRelativeToHitPlayer;
 
         public PlayerHitMessage(int clientHitId, int attackerId, int currentHealth,
-            Vector3 bulletHitRelativeToHitPlayer)
+            Vector3[] bulletHitRelativeToHitPlayer)
         {
             this.currentHealth = currentHealth;
             this.clientHitId = clientHitId;
             this.attackerId = attackerId;
-            this.bulletHitRelativeToHitPlayer = bulletHitRelativeToHitPlayer;
+            this.projectileHitsRelativeToHitPlayer = bulletHitRelativeToHitPlayer;
         }
     }
 }

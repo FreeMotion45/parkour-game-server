@@ -307,12 +307,13 @@ namespace Assets.Scripts.Network.Shared.Serializers
             writer.WriteClientID(msg.clientHitId);
             writer.WriteClientID(msg.attackerId);
             writer.Write(msg.currentHealth);
-            writer.Write(msg.bulletHitRelativeToHitPlayer);
+            writer.Write(msg.projectileHitsRelativeToHitPlayer);
         }
 
         public object ReadPlayerHit(BinaryReader reader)
-        {
-            return new PlayerHitMessage(reader.ReadClientID(), reader.ReadClientID(), reader.ReadInt32(), reader.ReadVector3());
+        {            
+            return new PlayerHitMessage(reader.ReadClientID(), reader.ReadClientID(),
+                reader.ReadInt32(), reader.ReadVector3Array());
         }
 
         public void WritePlayerKill(DatagramHolder dgram, BinaryWriter writer)

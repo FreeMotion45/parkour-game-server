@@ -12,19 +12,22 @@ namespace Assets.Scripts.Network.Utils
     {
         public static void Write(this BinaryWriter writer, Vector3[] vecs)
         {
+            writer.Write(vecs.Length);
             foreach (Vector3 v in vecs)
             {
                 writer.Write(v);
             }
         }
 
-        public static void ReadVector3Array(this BinaryReader reader, int count)
+        public static Vector3[] ReadVector3Array(this BinaryReader reader)
         {
-            List<Vector3> vecs = new List<Vector3>();
+            int count = reader.ReadInt32();
+            Vector3[] vecs = new Vector3[count];
             for (int i = 0; i < count; i++)
             {
-                vecs.Add(ReadVector3(reader));
+                vecs[i] = ReadVector3(reader);
             }
+            return vecs;
         }
 
         public static void Write(this BinaryWriter writer, Quaternion[] quaternions)

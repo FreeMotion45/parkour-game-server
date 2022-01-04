@@ -24,24 +24,21 @@ namespace Assets.Scripts.Handlers
 
         public PlayerRespawner playerRespawner;
         public int defaultGunDamage = 20;
+        public LayerMask hittableLayers;
 
         private LayerMask temporaryLayer;
 
-        private void Start()
+        void Start()
         {
             temporaryLayer = LayerMask.NameToLayer(PLAYER_SHOOT_IGNORE_LAYER);
         }
-
-        public LayerMask hittableLayers;
 
         public override void Handle(DatagramHolder deserializedDatagram, NetworkChannel networkChannel)
         {
             GamePlayers.Publish(deserializedDatagram, sender: networkChannel);
 
             // Get initial data.
-            PlayerShootMessage message = (PlayerShootMessage)deserializedDatagram.Data;
-            Quaternion playerRotation = message.Rotation;
-
+            PlayerShootMessage message = (PlayerShootMessage)deserializedDatagram.Data;            
 
             // Moving the player to a temporary isolated layer,
             // so he doesn't hit himself when shooting.
@@ -49,56 +46,64 @@ namespace Assets.Scripts.Handlers
             int originalLayer = player.layer;
             player.layer = temporaryLayer;
 
-            Gun playerGun = GamePlayers.GetComponent<Gun>(networkChannel);            
-            bool hit = playerGun.Shoot(playerRotation, hittableLayers, out RaycastHit bulletHit);
+            ServerGun playerGun = GetGunCurrentGun(networkChannel);
+            Dictionary<GameObject, ProjectileHitInfo> damageDealt = playerGun.CheckPlayersHit();
 
             // Moving the from the temporary layer to his original one.
             player.layer = originalLayer;
 
-            if (hit)
-            {                
-                HandleObjectHit(networkChannel, bulletHit);
-            }
-            else
+            foreach (GameObject objectHit in damageDealt.Keys)
             {
-                Debug.Log($"{GamePlayers.GetName(networkChannel)} shot and hit nothing");
+                if (objectHit.CompareTag("Player"))
+                {
+                    HandlePlayerHit(networkChannel, damageDealt[objectHit]);
+                }
+                else
+                {
+                    Debug.Log($"{GamePlayers.GetName(networkChannel)} shot and hit nothing");
+                }
             }
         }
 
-        private void HandleObjectHit(NetworkChannel shooterChannel, RaycastHit bulletHit)
+        private ServerGun GetGunCurrentGun(BaseNetworkChannel channel)
         {
-            GameObject objectHit = bulletHit.collider.gameObject;
-            if (!objectHit.CompareTag("Player")) return;
+            return GamePlayers.GetComponent<Transform>(channel)
+                .Find("Camera")
+                .GetComponentInChildren<ServerGun>();
+        }
 
-            PlayerGameState info = objectHit.GetComponent<PlayerGameState>();
+        private void HandlePlayerHit(NetworkChannel shooterChannel, ProjectileHitInfo hitInfo)
+        {
+            GameObject objectHit = hitInfo.hits[0].collider.gameObject;
+            PlayerGameState playerState = objectHit.GetComponent<PlayerGameState>();
             BaseNetworkChannel hitChannel = GamePlayers.GetChannel(objectHit);
             int idOfHitPlayer = hitChannel.ChannelID;
 
-            if (info.IsDead())
+            if (playerState.IsDead())
             {
                 Debug.Log($"{GamePlayers.GetName(shooterChannel)} shot and hit a dead player");
                 return;
             }
-
-            // TODO: Decouple this somehow.
-            int hitPlayerHealth = info.Damage(defaultGunDamage);
+            
+            int hitPlayerHealth = playerState.Damage(hitInfo.damageDealt);
 
             object data;
             DatagramType type;
 
-            if (info.IsDead())
+            if (playerState.IsDead())
             {
-                data = new PlayerKillMessage(idOfHitPlayer, shooterChannel.ChannelID);                
+                data = new PlayerKillMessage(idOfHitPlayer, shooterChannel.ChannelID);
                 type = DatagramType.PlayerKill;
                 Debug.Log($"{GamePlayers.GetName(shooterChannel)} killed {objectHit.name}");
                 playerRespawner.RespawnPlayer(hitChannel);
             }
             else
             {
-                Vector3 relativeHitPos = bulletHit.point - objectHit.transform.position;
-                data = new PlayerHitMessage(idOfHitPlayer, shooterChannel.ChannelID, hitPlayerHealth, relativeHitPos);
+                Vector3[] relativeHitPositions = hitInfo.hits
+                    .Select(bulletHit => bulletHit.point - objectHit.transform.position).ToArray();                
+                data = new PlayerHitMessage(idOfHitPlayer, shooterChannel.ChannelID, hitPlayerHealth, relativeHitPositions);
                 type = DatagramType.PlayerHit;
-                Debug.Log($"{GamePlayers.GetName(shooterChannel)} reduced {objectHit.name}'s health to {info.health}");
+                Debug.Log($"{GamePlayers.GetName(shooterChannel)} reduced {objectHit.name}'s health to {playerState.health}");
             }
 
             GamePlayers.Publish(data, type);

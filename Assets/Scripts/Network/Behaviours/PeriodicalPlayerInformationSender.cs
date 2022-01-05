@@ -53,7 +53,7 @@ namespace Assets.Scripts.Server
             GamePlayers.Publish(playersUpdateMessage, DatagramType.PlayersUpdate, transport: Shared.TransportType.Unreliable);
         }
 
-        private void SendTransformsUpdate()
+        public void SendTransformsUpdate()
         {
             if (netTransforms.Count == 0) return;
 

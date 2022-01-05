@@ -31,19 +31,9 @@ class ServerInventory : Inventory
             itemRb.isKinematic = false;
         }
 
-        Collider collider;
-        if (!droppedItem.TryGetComponent(out collider))
-        {
-            collider = droppedObject.AddComponent<MeshCollider>();
-            ((MeshCollider)collider).convex = true;
-        }
-        else
-        {
-            collider.enabled = true;
-        }
-
         NetTransform.RegisterNewNetObject(droppedObject);
         PeriodicalPlayerInformationSender.Instance.Add(droppedObject);
+        PeriodicalPlayerInformationSender.Instance.SendTransformsUpdate();
 
         droppedObject.SetActive(true);
         droppedObject.transform.SetParent(null);

@@ -42,7 +42,7 @@ class ServerInventory : Inventory
 
         Vector3 dropDirection = playerCamera.forward;
         itemRb.AddForce(dropDirection * dropForce);
-        itemRb.AddTorque(new Vector3(Random.value, Random.value, Random.value).normalized * 0.001f * dropForce);
+        itemRb.AddTorque(new Vector3(Random.value, Random.value, Random.value).normalized * 0.01f * dropForce);
 
         return success;
     }

@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Game.Shared
 {
-    enum PickUpType
+    public enum PickUpType
     {
         AmmoMagazine,
+        Health,
     }
 }

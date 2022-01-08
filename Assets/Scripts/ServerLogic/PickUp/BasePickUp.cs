@@ -9,16 +9,14 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityMultiplayer.Shared.Networking.Datagrams;
 
-abstract class BasePickUp : MonoBehaviour
+public abstract class BasePickUp : MonoBehaviour
 {
     public static int currentId;
-
-    public SphereCollider sphereCollider;
+        
+    public float pickUpRadius;
     public LayerMask playerLayerMask;
 
-    public PickUpType pickUpType;
-
-    private HashSet<GameObject> playersInRange;    
+    [HideInInspector] public PickUpType pickUpType;        
 
     public BasePickUp()
     {
@@ -37,23 +35,20 @@ abstract class BasePickUp : MonoBehaviour
 
     protected virtual void FixedUpdate()
     {
-        Collider[] colliders = Physics.OverlapSphere(transform.position, sphereCollider.radius, playerLayerMask);
+        Collider[] colliders = Physics.OverlapSphere(transform.position, pickUpRadius, playerLayerMask);
 
         // 1 because we are ignoring collision with ourself.
         foreach (Collider collider in colliders)
         {
-            if (collider == sphereCollider)
-                continue;
-
-            OnPlayerEntered(collider.gameObject);
+            if (collider.CompareTag("Player"))
+            {
+                OnPickUp(collider.gameObject);
+            }
         }
     }
 
-    private void OnPlayerEntered(GameObject player)
+    private void OnDrawGizmos()
     {
-        if (player.CompareTag("Player"))
-        {
-            OnPickUp(player);
-        }
-    } 
+        Gizmos.DrawWireSphere(transform.position, pickUpRadius);
+    }
 }

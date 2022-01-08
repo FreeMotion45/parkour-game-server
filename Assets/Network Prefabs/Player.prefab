@@ -143,10 +143,10 @@ MonoBehaviour:
   enableSfx: 0
   shootForce: 300
   maxHitDistance: 100
-  minShootInterval: 0.1
-  magazinesAvailable: 2
+  minShootInterval: 0.05
+  magazinesAvailable: 0
   magazineSize: 8
-  currentAmmoInMagazine: 8
+  currentAmmoInMagazine: 999
 --- !u!65 &7137081188493310585
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -200,9 +200,9 @@ MonoBehaviour:
   shootForce: 450
   maxHitDistance: 30
   minShootInterval: 0.8
-  magazinesAvailable: 2
+  magazinesAvailable: 0
   magazineSize: 30
-  currentAmmoInMagazine: 30
+  currentAmmoInMagazine: 999
   spreadAngle: 4
   projectiles: 6
 --- !u!1 &3798322843747746705
@@ -420,7 +420,7 @@ GameObject:
   - component: {fileID: 608703745046279678}
   - component: {fileID: 812404713414083406}
   - component: {fileID: 5453156471329734256}
-  - component: {fileID: 8299955459785458138}
+  - component: {fileID: 945545783254328015}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -522,7 +522,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCamera: {fileID: 4511198422964665715}
---- !u!114 &8299955459785458138
+--- !u!114 &945545783254328015
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -531,7 +531,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7063793092162795239}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0599f1479227410409d305661cd92de2, type: 3}
+  m_Script: {fileID: 11500000, guid: 7599e1376c9080548aad76e61aeff0f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 100

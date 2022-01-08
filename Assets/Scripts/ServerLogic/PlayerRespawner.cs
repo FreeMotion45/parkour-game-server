@@ -29,7 +29,7 @@ namespace Assets.Scripts.ServerLogic
             yield return new WaitForSeconds(respawnTime);
 
             Vector3 spawnPosition = GetRespawnPosition();
-            var state = GamePlayers.GetComponent<PlayerGameState>(player);
+            var state = GamePlayers.GetComponent<PlayerStats>(player);
             state.RevivePlayer(state.maxHealth);
 
             // Not doing the line below because the client is position authorative.

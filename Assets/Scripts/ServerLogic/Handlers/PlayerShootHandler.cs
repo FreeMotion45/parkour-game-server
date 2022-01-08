@@ -75,7 +75,7 @@ namespace Assets.Scripts.Handlers
         private void HandlePlayerHit(NetworkChannel shooterChannel, ProjectileHitInfo hitInfo)
         {
             GameObject objectHit = hitInfo.hits[0].collider.gameObject;
-            PlayerGameState playerState = objectHit.GetComponent<PlayerGameState>();
+            PlayerStats playerState = objectHit.GetComponent<PlayerStats>();
             BaseNetworkChannel hitChannel = GamePlayers.GetChannel(objectHit);
             int idOfHitPlayer = hitChannel.ChannelID;
 

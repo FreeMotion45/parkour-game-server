@@ -376,11 +376,14 @@ namespace Assets.Scripts.Network.Shared.Serializers
             else
             {
                 writer.Write(true);
-
-                if (msg.pickUpData is AmmoMagazinePickUpData data)
+                writer.Write((int)msg.pickUpData.pickUpType);
+                if (msg.pickUpData is AmmoMagazinePickUpData ammoData)
                 {
-                    writer.Write((int)PickUpType.AmmoMagazine);
-                    writer.Write(data.magazinesRecovered);
+                    writer.Write(ammoData.magazinesRecovered);
+                }
+                else if (msg.pickUpData is HealthPickUpData healthData)
+                {
+                    writer.Write(healthData.healAmount);
                 }
             }
         }
@@ -391,13 +394,17 @@ namespace Assets.Scripts.Network.Shared.Serializers
             int pickUpId = reader.ReadInt32();
             bool isPickUpDataInPacket = reader.ReadBoolean();
 
-            object pickUpData = null;
+            BasePickUpData pickUpData = null;
             if (isPickUpDataInPacket)
             {
                 PickUpType pickUpType = (PickUpType)reader.ReadInt32();
                 if (pickUpType == PickUpType.AmmoMagazine)
                 {
                     pickUpData = new AmmoMagazinePickUpData(reader.ReadInt32());
+                }
+                else if (pickUpType == PickUpType.Health)
+                {
+                    pickUpData = new HealthPickUpData(reader.ReadInt32());
                 }
             }
 

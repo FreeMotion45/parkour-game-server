@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 namespace Assets.Scripts.Network.Messages.ServerOrigin.PickUp.PickUpData
 {
     [Serializable]
-    class AmmoMagazinePickUpData : BasePickUpData
+    class HealthPickUpData : BasePickUpData
     {
-        public int magazinesRecovered;
+        public int healAmount;
 
-        public AmmoMagazinePickUpData(int magazinesRecovered) : base(PickUpType.AmmoMagazine)
+        public HealthPickUpData(int healAmount) : base(PickUpType.Health)
         {
-            this.magazinesRecovered = magazinesRecovered;
+            this.healAmount = healAmount;
         }
     }
 }

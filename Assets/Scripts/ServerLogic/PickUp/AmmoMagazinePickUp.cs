@@ -14,6 +14,11 @@ class AmmoMagazinePickUp : BasePickUp
 {
     public int magazinesToRecover = 2;
 
+    public AmmoMagazinePickUp()
+    {
+        pickUpType = Assets.Scripts.Game.Shared.PickUpType.AmmoMagazine;
+    }
+
     public override void OnPickUp(GameObject player)
     {
         player.GetComponent<Gun>().gunLogic.MagazinesAvailable += magazinesToRecover;

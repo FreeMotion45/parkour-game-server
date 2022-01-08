@@ -7,14 +7,15 @@ using UnityEngine;
 
 namespace Assets.Scripts.ServerLogic.PickUp
 {
-    class MagazineAmmoSpawner : MonoBehaviour
-    {        
+    class SimplePickUpSpawner : MonoBehaviour
+    {
         public IncrementingPositionByTransformContainer positionGenerator;
 
         public GameObject ammoPickUpPrefab;
 
         public float spawnIntervalMin = 10f;
         public float spawnIntervalMax = 20f;
+        public int totalToSpawn = -1;
 
         private float nextSpawnTime;
 
@@ -28,14 +29,20 @@ namespace Assets.Scripts.ServerLogic.PickUp
             if (Time.time > nextSpawnTime)
             {
                 nextSpawnTime = Time.time + UnityEngine.Random.Range(spawnIntervalMin, spawnIntervalMax);
-                SpawnItem(positionGenerator.GetNextPosition());                
+                SpawnItem(positionGenerator.GetNextPosition());
             }
         }
 
         private void SpawnItem(Vector3 spawnPosition)
         {
-            Instantiate(ammoPickUpPrefab, spawnPosition, Quaternion.identity);
-            Debug.Log("A new pick up has been spawned!");
+            if (totalToSpawn == -1 || totalToSpawn > 0)
+            {
+                if (totalToSpawn != -1)
+                    totalToSpawn--;
+
+                Instantiate(ammoPickUpPrefab, spawnPosition, Quaternion.identity);
+                Debug.Log("A new pick up has been spawned!");
+            }
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Assets.Scripts.ServerLogic.PickUp
     {
         public IncrementingPositionByTransformContainer positionGenerator;
 
-        public GameObject ammoPickUpPrefab;
+        public GameObject pickUpPrefab;
 
         public float spawnIntervalMin = 10f;
         public float spawnIntervalMax = 20f;
@@ -40,7 +40,7 @@ namespace Assets.Scripts.ServerLogic.PickUp
                 if (totalToSpawn != -1)
                     totalToSpawn--;
 
-                Instantiate(ammoPickUpPrefab, spawnPosition, Quaternion.identity);
+                Instantiate(pickUpPrefab, spawnPosition, Quaternion.identity);
                 Debug.Log("A new pick up has been spawned!");
             }
         }

@@ -385,6 +385,10 @@ namespace Assets.Scripts.Network.Shared.Serializers
                 {
                     writer.Write(healthData.healAmount);
                 }
+                else if (msg.pickUpData is ExtraJumpHeightPickUpData extraJumpHeightData)
+                {
+                    writer.Write(extraJumpHeightData.extraJumpHeight);
+                }
             }
         }
 
@@ -405,6 +409,10 @@ namespace Assets.Scripts.Network.Shared.Serializers
                 else if (pickUpType == PickUpType.Health)
                 {
                     pickUpData = new HealthPickUpData(reader.ReadInt32());
+                }
+                else if (pickUpType == PickUpType.ExtraJumpHeight)
+                {
+                    pickUpData = new ExtraJumpHeightPickUpData(reader.ReadSingle());
                 }
             }
 

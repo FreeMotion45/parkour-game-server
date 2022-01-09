@@ -10,5 +10,6 @@ namespace Assets.Scripts.Game.Shared
     {
         AmmoMagazine,
         Health,
+        ExtraJumpHeight,
     }
 }
